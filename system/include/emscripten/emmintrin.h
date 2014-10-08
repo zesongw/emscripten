@@ -1,6 +1,10 @@
+#ifndef __emscripten_emmintrin_h__
+#define __emscripten_emmintrin_h__
+
 #include <xmmintrin.h>
 
 typedef int32x4 __m128i;
+typedef float64x2 __m128d;
 
 static __inline__ __m128i __attribute__((__always_inline__))
 _mm_set_epi32(int z, int y, int x, int w)
@@ -85,3 +89,20 @@ _mm_cvtps_epi32(__m128 a)
 {
   return emscripten_int32x4_fromFloat32x4(a);
 }
+
+// This is defined as a macro because __builtin_shufflevector requires its
+// mask argument to be a compile-time constant.
+#define _mm_shuffle_epi32(a, mask) \
+  ((__m128)__builtin_shufflevector((a), (a), \
+                                  (((mask) >> 0) & 0x3), \
+                                  (((mask) >> 2) & 0x3), \
+                                  (((mask) >> 4) & 0x3), \
+                                  (((mask) >> 6) & 0x3)))
+
+static __inline__ __m128d __attribute__((__always_inline__))
+_mm_move_sd (__m128d a, __m128d b)
+{
+  return __builtin_shufflevector(a, b, 2, 1);
+}
+
+#endif

@@ -10,6 +10,7 @@ extern "C" {
 typedef float float32x2 __attribute__((__vector_size__(8), __may_alias__));
 typedef float float32x4 __attribute__((__vector_size__(16), __may_alias__));
 typedef unsigned int int32x4 __attribute__((__vector_size__(16), __may_alias__));
+typedef double float64x2 __attribute__((__vector_size__(16), __may_alias__));
 
 unsigned int emscripten_float32x4_signmask(float32x4 __x) __attribute__((__nothrow__, __const__));
 
