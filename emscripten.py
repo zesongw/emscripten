@@ -1042,19 +1042,24 @@ def emscript_fast(infile, settings, outfile, libraries=[], compiler_engine=None,
       asm_setup = ''
       maths = ['Math.' + func for func in ['floor', 'abs', 'sqrt', 'pow', 'cos', 'sin', 'tan', 'acos', 'asin', 'atan', 'atan2', 'exp', 'log', 'ceil', 'imul']]
       simdfloattypes = ['float32x4']
+      simdfloat64types = ['float64x2']
       simdinttypes = ['int32x4']
-      simdtypes = simdfloattypes + simdinttypes
+      simdtypes = simdfloattypes + simdinttypes + simdfloat64types
       # TODO: Make mul, min and max available for int32x4 too.
       simdfuncs = ['add', 'sub',
                    'equal', 'notEqual', 'lessThan', 'lessThanOrEqual', 'greaterThan', 'greaterThanOrEqual',
                    'select', 'and', 'or', 'xor', 'not',
                    'splat', 'shuffle', 'shuffleMix',
-                   'withX', 'withY', 'withZ', 'withW',
-                   'load', 'loadX', 'loadXY', 'loadXYZ',
-                   'store', 'storeX', 'storeXY', 'storeXYZ']
-      simdfloatfuncs = simdfuncs + ['mul', 'div', 'min', 'max', 'sqrt',
-                                    'fromInt32x4', 'fromInt32x44Bits'];
-      simdintfuncs = simdfuncs + ['fromFloat32x4', 'fromFloat32x4Bits'];
+                   'withX', 'withY', 'load', 'loadX', 
+                   'store', 'storeX', ]
+      simdx4funcs = ['withZ', 'withW', 'loadXY', 'loadXYZ', 'storeXY', 'storeXYZ']
+      simdfloatfuncs = simdfuncs + simdx4funcs + ['mul', 'div', 'min', 'max', 'sqrt',
+                                                  'fromInt32x4', 'fromInt32x4Bits',
+                                                  'fromFloat64x2', 'fromFloat64x2Bits'];
+      simdintfuncs = simdfuncs + simdx4funcs + ['fromFloat32x4', 'fromFloat32x4Bits',
+                                                'fromFloat64x2', 'fromFloat64x2Bits'];
+      simdfloat64funcs = simdfuncs + ['fromFloat32x4', 'fromFloat32x4Bits',
+                                      'fromInt32x4', 'fromInt32x4Bits',];
       fundamentals = ['Math', 'Int8Array', 'Int16Array', 'Int32Array', 'Uint8Array', 'Uint16Array', 'Uint32Array', 'Float32Array', 'Float64Array']
       if metadata['simd']:
           fundamentals += ['SIMD']
@@ -1199,6 +1204,7 @@ def emscript_fast(infile, settings, outfile, libraries=[], compiler_engine=None,
         asm_global_funcs += ''.join(['  var SIMD_' + ty + '=global' + access_quote('SIMD') + access_quote(ty) + ';\n' for ty in simdtypes])
         asm_global_funcs += ''.join(['  var SIMD_' + ty + '_' + g + '=SIMD_' + ty + access_quote(g) + ';\n' for ty in simdinttypes for g in simdintfuncs])
         asm_global_funcs += ''.join(['  var SIMD_' + ty + '_' + g + '=SIMD_' + ty + access_quote(g) + ';\n' for ty in simdfloattypes for g in simdfloatfuncs])
+        asm_global_funcs += ''.join(['  var SIMD_' + ty + '_' + g + '=SIMD_' + ty + access_quote(g) + ';\n' for ty in simdfloat64types for g in simdfloat64funcs])
       asm_global_vars = ''.join(['  var ' + g + '=env' + access_quote(g) + '|0;\n' for g in basic_vars + global_vars])
       # In linkable modules, we need to add some explicit globals for global variables that can be linked and used across modules
       if settings.get('MAIN_MODULE') or settings.get('SIDE_MODULE'):
