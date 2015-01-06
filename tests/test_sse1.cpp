@@ -126,15 +126,361 @@ __attribute__((noinline)) __m64 get_m1() { return always_true() ? u64castm64(0x0
 __attribute__((noinline)) __m64 get_m2() { return always_true() ? u64castm64(0xFEDCBA9876543210ULL) : __m64(); }
 #endif
 
+float *arr = get_arr(); // [4, 3, 2, 1]
+float *uarr = get_uarr(); // [5, 4, 3, 2]
+float *arr2 = get_arr2(); // [4, 3, 2, 1]
+float *uarr2 = get_uarr2(); // [5, 4, 3, 2]
+__m128 a = get_a(); // [8, 6, 4, 2]
+__m128 b = get_b(); // [1, 2, 3, 4]
+
+__attribute__((noinline)) void test_mm_load_ps() {
+	aeq(_mm_load_ps(arr), 4.f, 3.f, 2.f, 1.f); // 4-wide load from aligned address.
+}
+
+__attribute__((noinline)) void test_mm_load_ps1() {
+	aeq(_mm_load_ps1(uarr), 2.f, 2.f, 2.f, 2.f); // Load scalar from unaligned address and populate 4-wide.
+}
+
+__attribute__((noinline)) void test_mm_load_ss() {
+	aeq(_mm_load_ss(uarr), 0.f, 0.f, 0.f, 2.f); // Load scalar from unaligned address to lowest, and zero all highest.
+}
+
+__attribute__((noinline)) void test_mm_load1_ps() {
+	aeq(_mm_load1_ps(uarr), 2.f, 2.f, 2.f, 2.f); // _mm_load1_ps == _mm_load_ps1
+}
+
+__attribute__((noinline)) void test_mm_loadh_pi() {
+	aeq(_mm_loadh_pi(a, (__m64*)uarr), 3.f, 2.f, 4.f, 2.f); // Load two highest addresses, preserve two lowest.
+}
+
+__attribute__((noinline)) void test_mm_loadl_pi() {
+	aeq(_mm_loadl_pi(a, (__m64*)uarr), 8.f, 6.f, 3.f, 2.f); // Load two lowest addresses, preserve two highest.
+}
+
+__attribute__((noinline)) void test_mm_loadr_ps() {
+	aeq(_mm_loadr_ps(arr), 1.f, 2.f, 3.f, 4.f); // 4-wide load from an aligned address, but reverse order.
+}
+
+__attribute__((noinline)) void test_mm_loadu_ps() {
+	aeq(_mm_loadu_ps(uarr), 5.f, 4.f, 3.f, 2.f); // 4-wide load from an unaligned address.
+}
+
+__attribute__((noinline)) void test_mm_set_ps() {
+	aeq(_mm_set_ps(uarr[3], 2.f, 3.f, 4.f), 5.f, 2.f, 3.f, 4.f); // 4-wide set by specifying four immediate or memory operands.
+}
+
+__attribute__((noinline)) void test_mm_set_ps1() {
+	aeq(_mm_set_ps1(uarr[3]), 5.f, 5.f, 5.f, 5.f); // 4-wide set by specifying one scalar that is expanded.
+}
+
+__attribute__((noinline)) void test_mm_set_ss() {
+	aeq(_mm_set_ss(uarr[3]), 0.f, 0.f, 0.f, 5.f); // Set scalar at lowest index, zero all higher.
+}
+
+__attribute__((noinline)) void test_mm_set1_ps() {
+	aeq(_mm_set1_ps(uarr[3]), 5.f, 5.f, 5.f, 5.f); // _mm_set1_ps == _mm_set_ps1
+}
+
+__attribute__((noinline)) void test_mm_setr_ps() {
+	aeq(_mm_setr_ps(uarr[3], 2.f, 3.f, 4.f), 4.f, 3.f, 2.f, 5.f); // 4-wide set by specifying four immediate or memory operands, but reverse order.
+}
+
+__attribute__((noinline)) void test_mm_setzero_ps() {
+	aeq(_mm_setzero_ps(), 0.f, 0.f, 0.f, 0.f); // Returns a new zero register.
+}
+
+__attribute__((noinline)) void test_mm_move_ss() {
+	aeq(_mm_move_ss(a, b), 8.f, 6.f, 4.f, 4.f); // Copy three highest elements from a, and lowest from b.
+}
+
+__attribute__((noinline)) void test_mm_movehl_ps() {
+	aeq(_mm_movehl_ps(a, b), 8.f, 6.f, 1.f, 2.f); // Copy two highest elements from a, and take two highest from b and place them to the two lowest in output.
+}
+
+__attribute__((noinline)) void test_mm_movelh_ps() {
+	aeq(_mm_movelh_ps(a, b), 3.f, 4.f, 4.f, 2.f); // Copy two lowest elements from a, and take two lowest from b and place them to the two highest in output.
+}
+
+__attribute__((noinline)) void test_mm_store_ps() {
+	_mm_store_ps(arr2, a); aeq(_mm_load_ps(arr2), 8.f, 6.f, 4.f, 2.f); // _mm_store_ps: 4-wide store to aligned memory address.
+}
+
+__attribute__((noinline)) void test_mm_store_ps1() {
+	_mm_store_ps1(arr2, a); aeq(_mm_load_ps(arr2), 2.f, 2.f, 2.f, 2.f); // _mm_store_ps1: Store lowest scalar to aligned address, duplicating the element 4 times. 
+}
+
+__attribute__((noinline)) void test_mm_store_ss() {
+	_mm_storeu_ps(uarr2, _mm_set1_ps(100.f)); _mm_store_ss(uarr2, b); aeq(_mm_loadu_ps(uarr2), 100.f, 100.f, 100.f, 4.f); // _mm_store_ss: Store lowest scalar to unaligned address. Don't adjust higher addresses in memory.
+}
+
+__attribute__((noinline)) void test_mm_store1_ps() {
+	_mm_store_ps(arr2, _mm_set1_ps(100.f)); _mm_store1_ps(arr2, a); aeq(_mm_load_ps(arr2), 2.f, 2.f, 2.f, 2.f); // _mm_store1_ps == _mm_store_ps1
+}
+
+__attribute__((noinline)) void test_mm_storeh_pi() {
+	_mm_storeu_ps(uarr2, _mm_set1_ps(100.f)); _mm_storeh_pi((__m64*)uarr2, a); aeq(_mm_loadu_ps(uarr2), 100.f, 100.f, 8.f, 6.f); // _mm_storeh_pi: Store two highest elements to memory.
+}
+
+__attribute__((noinline)) void test_mm_storel_pi() {
+	_mm_storeu_ps(uarr2, _mm_set1_ps(100.f)); _mm_storel_pi((__m64*)uarr2, a); aeq(_mm_loadu_ps(uarr2), 100.f, 100.f, 4.f, 2.f); // _mm_storel_pi: Store two lowest elements to memory.
+}
+
+__attribute__((noinline)) void test_mm_storer_ps() {
+	_mm_storer_ps(arr2, a); aeq(_mm_load_ps(arr2), 2.f, 4.f, 6.f, 8.f); // _mm_storer_ps: 4-wide store to aligned memory address, but reverse the elements on output.
+}
+
+__attribute__((noinline)) void test_mm_storeu_ps() {
+	_mm_storeu_ps(uarr2, a); aeq(_mm_loadu_ps(uarr2), 8.f, 6.f, 4.f, 2.f); // _mm_storeu_ps: 4-wide store to unaligned memory address.
+}
+
+__attribute__((noinline)) void test_mm_add_ps() {
+  aeq(_mm_add_ps(a, b), 9.f, 8.f, 7.f, 6.f); // 4-wide add.
+}
+__attribute__((noinline)) void test_mm_add_ss() {
+	aeq(_mm_add_ss(a, b), 8.f, 6.f, 4.f, 6.f); // Add lowest element, preserve three highest unchanged from a.
+}
+__attribute__((noinline)) void test_mm_div_ps() {
+	aeq(_mm_div_ps(a, _mm_set_ps(2.f, 3.f, 8.f, 2.f)), 4.f, 2.f, 0.5f, 1.f); // 4-wide div.
+}
+__attribute__((noinline)) void test_mm_div_ss() {
+	aeq(_mm_div_ss(a, _mm_set_ps(2.f, 3.f, 8.f, 8.f)), 8.f, 6.f, 4.f, 0.25f); // Div lowest element, preserve three highest unchanged from a.
+}
+__attribute__((noinline)) void test_mm_mul_ps() {
+	aeq(_mm_mul_ps(a, b), 8.f, 12.f, 12.f, 8.f); // 4-wide mul.
+}
+__attribute__((noinline)) void test_mm_mul_ss() {
+	aeq(_mm_mul_ss(a, b), 8.f, 6.f, 4.f, 8.f); // Mul lowest element, preserve three highest unchanged from a.
+}
+__attribute__((noinline)) void test_mm_sub_ps() {
+	aeq(_mm_sub_ps(a, b), 7.f, 4.f, 1.f, -2.f); // 4-wide sub.
+}
+__attribute__((noinline)) void test_mm_sub_ss() {
+	aeq(_mm_sub_ss(a, b), 8.f, 6.f, 4.f, -2.f); // Sub lowest element, preserve three highest unchanged from a.
+}
+
+__attribute__((noinline)) void test_mm_rcp_ps() {
+	aeq(_mm_rcp_ps(a), 0.124969f, 0.166626f, 0.249939f, 0.499878f); // Compute 4-wide 1/x.
+}
+__attribute__((noinline)) void test_mm_rcp_ss() {
+	aeq(_mm_rcp_ss(a), 8.f, 6.f, 4.f, 0.499878f); // Compute 1/x of lowest element, pass higher elements unchanged.
+}
+__attribute__((noinline)) void test_mm_rsqrt_ps() {
+	aeq(_mm_rsqrt_ps(a), 0.353455f, 0.408203f, 0.499878f, 0.706909f); // Compute 4-wide 1/sqrt(x).
+}
+__attribute__((noinline)) void test_mm_rsqrt_ss() {
+	aeq(_mm_rsqrt_ss(a), 8.f, 6.f, 4.f, 0.706909f); // Compute 1/sqrt(x) of lowest element, pass higher elements unchanged.
+}
+__attribute__((noinline)) void test_mm_sqrt_ps() {
+	aeq(_mm_sqrt_ps(a), 2.82843f, 2.44949f, 2.f, 1.41421f); // Compute 4-wide sqrt(x).
+}
+__attribute__((noinline)) void test_mm_sqrt_ss() {
+	aeq(_mm_sqrt_ss(a), 8.f, 6.f, 4.f, 1.41421f); // Compute sqrt(x) of lowest element, pass higher elements unchanged.
+}
+
+__m128 i1 = get_i1();
+__m128 i2 = get_i2();
+
+__attribute__((noinline)) void test_mm_and_ps() {
+	aeqi(_mm_and_ps(i1, i2), 0x83200100, 0x0fecc988, 0x80244021, 0x13458a88); // 4-wide binary AND
+}
+__attribute__((noinline)) void test_mm_andnot_ps() {
+	aeqi(_mm_andnot_ps(i1, i2), 0x388a9888, 0xf0021444, 0x7000289c, 0x00121046); // 4-wide binary (!i1) & i2
+}
+__attribute__((noinline)) void test_mm_or_ps() {
+	aeqi(_mm_or_ps(i1, i2), 0xbfefdba9, 0xffefdfed, 0xf7656bbd, 0xffffdbef); // 4-wide binary OR
+}
+__attribute__((noinline)) void test_mm_xor_ps() {
+	aeqi(_mm_xor_ps(i1, i2), 0x3ccfdaa9, 0xf0031665, 0x77412b9c, 0xecba5167); // 4-wide binary XOR
+}
+__attribute__((noinline)) void test_mm_cmpeq_ps() {
+	aeqi(_mm_cmpeq_ps(a, _mm_set_ps(8.f, 0.f, 4.f, 0.f)), 0xFFFFFFFF, 0, 0xFFFFFFFF, 0); // 4-wide cmp ==
+}
+__attribute__((noinline)) void test_mm_cmpeq_ss() {
+	aeqi(_mm_cmpeq_ss(a, _mm_set_ps(8.f, 0.f, 4.f, 2.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0xFFFFFFFF); // scalar cmp ==, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmpge_ps() {
+	aeqi(_mm_cmpge_ps(a, _mm_set_ps(8.f, 7.f, 3.f, 5.f)), 0xFFFFFFFF, 0, 0xFFFFFFFF, 0); // 4-wide cmp >=
+}
+__attribute__((noinline)) void test_mm_cmpge_ss() {
+	aeqi(_mm_cmpge_ss(a, _mm_set_ps(8.f, 7.f, 3.f, 0.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0xFFFFFFFF); // scalar cmp >=, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmpgt_ps() {
+	aeqi(_mm_cmpgt_ps(a, _mm_set_ps(8.f, 7.f, 3.f, 5.f)), 0, 0, 0xFFFFFFFF, 0); // 4-wide cmp >
+}
+__attribute__((noinline)) void test_mm_cmpgt_ss() {
+	aeqi(_mm_cmpgt_ss(a, _mm_set_ps(8.f, 7.f, 3.f, 2.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0); // scalar cmp >, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmple_ps() {
+	aeqi(_mm_cmple_ps(a, _mm_set_ps(8.f, 7.f, 3.f, 5.f)), 0xFFFFFFFF, 0xFFFFFFFF, 0, 0xFFFFFFFF); // 4-wide cmp <=
+}
+__attribute__((noinline)) void test_mm_cmple_ss() {
+	aeqi(_mm_cmple_ss(a, _mm_set_ps(8.f, 7.f, 3.f, 0.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0); // scalar cmp <=, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmplt_ps() {
+	aeqi(_mm_cmplt_ps(a, _mm_set_ps(8.f, 7.f, 3.f, 5.f)), 0, 0xFFFFFFFF, 0, 0xFFFFFFFF); // 4-wide cmp <
+}
+__attribute__((noinline)) void test_mm_cmplt_ss() {
+	aeqi(_mm_cmplt_ss(a, _mm_set_ps(8.f, 7.f, 3.f, 2.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0); // scalar cmp <, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmpneq_ps() {
+	aeqi(_mm_cmpneq_ps(a, _mm_set_ps(8.f, 0.f, 4.f, 0.f)), 0, 0xFFFFFFFF, 0, 0xFFFFFFFF); // 4-wide cmp !=
+}
+__attribute__((noinline)) void test_mm_cmpneq_ss() {
+	aeqi(_mm_cmpneq_ss(a, _mm_set_ps(8.f, 0.f, 4.f, 2.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0); // scalar cmp !=, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmpnge_ps() {
+	aeqi(_mm_cmpnge_ps(a, _mm_set_ps(8.f, 7.f, 3.f, 5.f)), 0, 0xFFFFFFFF, 0, 0xFFFFFFFF); // 4-wide cmp not >=
+}
+__attribute__((noinline)) void test_mm_cmpnge_ss() {
+	aeqi(_mm_cmpnge_ss(a, _mm_set_ps(8.f, 7.f, 3.f, 0.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0); // scalar cmp not >=, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmpngt_ps() {
+	aeqi(_mm_cmpngt_ps(a, _mm_set_ps(8.f, 7.f, 3.f, 5.f)), 0xFFFFFFFF, 0xFFFFFFFF, 0, 0xFFFFFFFF); // 4-wide cmp not >
+}
+__attribute__((noinline)) void test_mm_cmpngt_ss() {
+	aeqi(_mm_cmpngt_ss(a, _mm_set_ps(8.f, 7.f, 3.f, 2.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0xFFFFFFFF); // scalar cmp not >, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmpnle_ps() {
+	aeqi(_mm_cmpnle_ps(a, _mm_set_ps(8.f, 7.f, 3.f, 5.f)), 0, 0, 0xFFFFFFFF, 0); // 4-wide cmp not <=
+}
+__attribute__((noinline)) void test_mm_cmpnle_ss() {
+	aeqi(_mm_cmpnle_ss(a, _mm_set_ps(8.f, 7.f, 3.f, 0.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0xFFFFFFFF); // scalar cmp not <=, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmpnlt_ps() {
+	aeqi(_mm_cmpnlt_ps(a, _mm_set_ps(8.f, 7.f, 3.f, 5.f)), 0xFFFFFFFF, 0, 0xFFFFFFFF, 0); // 4-wide cmp not <
+}
+__attribute__((noinline)) void test_mm_cmpnlt_ss() {
+	aeqi(_mm_cmpnlt_ss(a, _mm_set_ps(8.f, 7.f, 3.f, 2.f)), fcastu(8.f), fcastu(6.f), fcastu(4.f), 0xFFFFFFFF); // scalar cmp not <, pass three highest unchanged.
+}
+
+__m128 nan1 = get_nan1(); // [NAN, 0, 0, NAN]
+__m128 nan2 = get_nan2(); // [NAN, NAN, 0, 0]
+
+__attribute__((noinline)) void test_mm_cmpord_ps() {
+	aeqi(_mm_cmpord_ps(nan1, nan2), 0, 0, 0xFFFFFFFF, 0); // 4-wide test if both operands are not nan.
+}
+__attribute__((noinline)) void test_mm_cmpord_ss() {
+	aeqi(_mm_cmpord_ss(nan1, nan2), fcastu(NAN), 0, 0, 0); // scalar test if both operands are not nan, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_cmpunord_ps() {
+	aeqi(_mm_cmpunord_ps(nan1, nan2), 0xFFFFFFFF, 0xFFFFFFFF, 0, 0xFFFFFFFF); // 4-wide test if one of the operands is nan.
+}
+__attribute__((noinline)) void test_mm_cmpunord_ss() {
+	aeqi(_mm_cmpunord_ss(nan1, nan2), fcastu(NAN), 0, 0, 0xFFFFFFFF); // scalar test if one of the operands is nan, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_comieq_ss() {
+	Assert(_mm_comieq_ss(a, b) == 0); // Scalar cmp == of lowest element, return int.
+}
+__attribute__((noinline)) void test_mm_comige_ss() {
+	Assert(_mm_comige_ss(a, b) == 0); // Scalar cmp >= of lowest element, return int.
+}
+__attribute__((noinline)) void test_mm_comigt_ss() {
+	Assert(_mm_comigt_ss(b, a) == 1); // Scalar cmp > of lowest element, return int.
+}
+__attribute__((noinline)) void test_mm_comile_ss() {
+	Assert(_mm_comile_ss(b, a) == 0); // Scalar cmp <= of lowest element, return int.
+}
+__attribute__((noinline)) void test_mm_comilt_ss() {
+	Assert(_mm_comilt_ss(a, b) == 1); // Scalar cmp < of lowest element, return int.
+}
+__attribute__((noinline)) void test_mm_comineq_ss() {
+	Assert(_mm_comineq_ss(a, b) == 1); // Scalar cmp != of lowest element, return int.
+}
+__attribute__((noinline)) void test_mm_ucomieq_ss() {
+	Assert(_mm_ucomieq_ss(a, b) == 0);
+}
+__attribute__((noinline)) void test_mm_ucomige_ss() {
+	Assert(_mm_ucomige_ss(a, b) == 0);
+}
+__attribute__((noinline)) void test_mm_ucomigt_ss() {
+	Assert(_mm_ucomigt_ss(b, a) == 1);
+}
+__attribute__((noinline)) void test_mm_ucomile_ss() {
+	Assert(_mm_ucomile_ss(b, a) == 0);
+}
+__attribute__((noinline)) void test_mm_ucomilt_ss() {
+	Assert(_mm_ucomilt_ss(a, b) == 1);
+}
+__attribute__((noinline)) void test_mm_ucomineq_ss() {
+	Assert(_mm_ucomineq_ss(a, b) == 1);
+}
+
+__m128 c = get_c(); // [1.5, 2.5, 3.5, 4.5]
+__m128 e = get_e(); // [INF, -INF, 2.5, 3.5]
+__m128 f = get_f(); // [-1.5, 1.5, -2.5, -9223372036854775808]
+
+__attribute__((noinline)) void test_mm_cvtsi32_ss() {
+	aeq(_mm_cvtsi32_ss(c, -16777215), 1.5f, 2.5f, 3.5f, -16777215.f); // Convert int to float, store in lowest channel of m128.
+}
+__attribute__((noinline)) void test_mm_cvt_si2ss() {
+	aeq( _mm_cvt_si2ss(c, -16777215), 1.5f, 2.5f, 3.5f, -16777215.f); // _mm_cvt_si2ss is an alias to _mm_cvtsi32_ss.
+}
+__attribute__((noinline)) void test_mm_cvtss_si32() {
+	Assert(_mm_cvtss_si32(c) == 4); Assert(_mm_cvtss_si32(e) == 4); // Convert lowest channel of m128 from float to int.
+}
+__attribute__((noinline)) void test_mm_cvt_ss2si() {
+	Assert( _mm_cvt_ss2si(c) == 4); Assert( _mm_cvt_ss2si(e) == 4); // _mm_cvt_ss2si is an alias to _mm_cvtss_si32.
+}
+__attribute__((noinline)) void test_mm_cvtsi64_ss() {
+	aeq(_mm_cvtsi64_ss(c, -9223372036854775808ULL), 1.5f, 2.5f, 3.5f, -9223372036854775808.f); // Convert single int64 to float, store in lowest channel of m128, and pass three higher channel unchanged.
+}
+__attribute__((noinline)) void test_mm_cvtss_f32() {
+	Assert(_mm_cvtss_f32(c) == 4.5f); // Extract lowest channel of m128 to a plain old float.
+}
+__attribute__((noinline)) void test_mm_cvtss_si64() {
+	Assert(_mm_cvtss_si64(f) == -9223372036854775808ULL); // Convert lowest channel of m128 from float to int64.
+}
+__attribute__((noinline)) void test_mm_cvttss_si32() {
+	Assert(_mm_cvttss_si32(e) == 3); // Truncating conversion from the lowest float of a m128 to int32.
+}
+__attribute__((noinline)) void test_mm_cvtt_ss2si() {
+	Assert( _mm_cvtt_ss2si(e) == 3); // _mm_cvtt_ss2si is an alias to _mm_cvttss_si32.
+}
+__attribute__((noinline)) void test_mm_cvttss_si64() {
+	Assert(_mm_cvttss_si64(f) == -9223372036854775808ULL); // Truncating conversion from lowest channel of m128 from float to int64.
+}
+__attribute__((noinline)) void test_mm_movemask_ps() {
+	Assert(_mm_movemask_ps(_mm_set_ps(-1.f, 0.f, 1.f, NAN)) == 8); // Return int with four lowest bits set depending on the highest bits of the 4 m128 input channels.
+}
+
+	// a = [8, 6, 4, 2], b = [1, 2, 3, 4]
+__attribute__((noinline)) void test_mm_max_ps() {
+	aeq(_mm_max_ps(a, b), 8.f, 6.f, 4.f, 4.f); // 4-wide max.
+}
+__attribute__((noinline)) void test_mm_max_ss() {
+	aeq(_mm_max_ss(a, _mm_set1_ps(100.f)), 8.f, 6.f, 4.f, 100.f); // Scalar max, pass three highest unchanged.
+}
+__attribute__((noinline)) void test_mm_min_ps() {
+	aeq(_mm_min_ps(a, b), 1.f, 2.f, 3.f, 2.f); // 4-wide min.
+}
+__attribute__((noinline)) void test_mm_min_ss() {
+	aeq(_mm_min_ss(a, _mm_set1_ps(-100.f)), 8.f, 6.f, 4.f, -100.f); // Scalar min, pass three highest unchanged.
+}
+
+__attribute__((noinline)) void test_mm_shuffle_ps() {
+	aeq(_mm_shuffle_ps(a, b, _MM_SHUFFLE(1, 0, 3, 2)), 3.f, 4.f, 8.f, 6.f);
+}
+__attribute__((noinline)) void test_mm_unpackhi_ps() {
+	aeq(_mm_unpackhi_ps(a, b), 1.f , 8.f, 2.f, 6.f);
+}
+__attribute__((noinline)) void test_mm_unpacklo_ps() {
+	aeq(_mm_unpacklo_ps(a, b), 3.f , 4.f, 4.f, 2.f);
+}
+
+__m128 c0 = a; // [8, 6, 4, 2]
+__m128 c1 = b; // [1, 2, 3, 4]
+__m128 c2 = get_c(); // [1.5, 2.5, 3.5, 4.5]
+__m128 c3 = get_d(); // [8.5, 6.5, 4.5, 2.5]
+__attribute__((noinline)) void test_MM_TRANSPOSE4_PS() {
+	_MM_TRANSPOSE4_PS(c0, c1, c2, c3);
+	aeq(c0, 2.5f, 4.5f, 4.f, 2.f);
+	aeq(c1, 4.5f, 3.5f, 3.f, 4.f);
+	aeq(c2, 6.5f, 2.5f, 2.f, 6.f);
+	aeq(c3, 8.5f, 1.5f, 1.f, 8.f);
+}
+
 int main()
 {
-	float *arr = get_arr(); // [4, 3, 2, 1]
-	float *uarr = get_uarr(); // [5, 4, 3, 2]
-	float *arr2 = get_arr2(); // [4, 3, 2, 1]
-	float *uarr2 = get_uarr2(); // [5, 4, 3, 2]
-	__m128 a = get_a(); // [8, 6, 4, 2]
-	__m128 b = get_b(); // [1, 2, 3, 4]
-
 	// Check that test data is like expected.
 	Assert(((uintptr_t)arr & 0xF) == 0); // arr must be aligned by 16.
 	Assert(((uintptr_t)uarr & 0xF) != 0); // uarr must be unaligned.
@@ -146,6 +492,130 @@ int main()
 #ifdef TEST_M64
 	Assert(aeq64(u64castm64(0x22446688AACCEEFFULL), 0xABABABABABABABABULL, false) == false);
 #endif
+  // SSE1 Load instructions:
+	test_mm_load_ps();
+	test_mm_load_ps1();
+	test_mm_load_ss();
+	test_mm_load1_ps();
+	test_mm_loadh_pi();
+	test_mm_loadl_pi();
+	test_mm_loadr_ps();
+	test_mm_loadu_ps();
+
+	// SSE1 Set instructions:
+	test_mm_set_ps();
+	test_mm_set_ps1();
+	test_mm_set_ss();
+	test_mm_set1_ps();
+	test_mm_setr_ps();
+	test_mm_setzero_ps();
+
+	// SSE1 Move instructions:
+	test_mm_move_ss();
+	test_mm_movehl_ps();
+	test_mm_movelh_ps();
+
+	// SSE1 Store instructions:
+  test_mm_store_ps();
+  test_mm_store_ps1();
+  test_mm_store_ss();
+  test_mm_store1_ps();
+  test_mm_storeh_pi();
+  test_mm_storel_pi();
+  test_mm_storer_ps();
+  test_mm_storeu_ps();
+
+	// SSE1 Arithmetic instructions:
+  test_mm_add_ps();
+  test_mm_add_ss();
+  test_mm_div_ps();
+  test_mm_div_ss();
+  test_mm_mul_ps();
+  test_mm_mul_ss();
+  test_mm_sub_ps();
+  test_mm_sub_ss();
+
+	// SSE1 Elementary Math functions:
+  test_mm_rcp_ps();
+  test_mm_rcp_ss();
+  test_mm_rsqrt_ps();
+  test_mm_rsqrt_ss();
+  test_mm_sqrt_ps();
+  test_mm_sqrt_ss();
+
+	// SSE1 Logical instructions:
+	test_mm_and_ps();
+  test_mm_andnot_ps();
+  test_mm_or_ps();
+  test_mm_xor_ps();
+
+	// SSE1 Compare instructions:
+	test_mm_cmpeq_ps();
+	test_mm_cmpeq_ss();
+	test_mm_cmpge_ps();
+	test_mm_cmpge_ss();
+	test_mm_cmpgt_ps();
+	test_mm_cmpgt_ss();
+	test_mm_cmple_ps();
+	test_mm_cmple_ss();
+	test_mm_cmplt_ps();
+	test_mm_cmplt_ss();
+	test_mm_cmpneq_ps();
+	test_mm_cmpneq_ss();
+	test_mm_cmpnge_ps();
+	test_mm_cmpnge_ss();
+	test_mm_cmpngt_ps();
+	test_mm_cmpngt_ss();
+	test_mm_cmpnle_ps();
+	test_mm_cmpnle_ss();
+	test_mm_cmpnlt_ps();
+	test_mm_cmpnlt_ss();
+	test_mm_cmpord_ps();
+	test_mm_cmpord_ss();
+	test_mm_cmpunord_ps();
+	test_mm_cmpunord_ss();
+	test_mm_comieq_ss();
+	test_mm_comige_ss();
+	test_mm_comigt_ss();
+	test_mm_comile_ss();
+	test_mm_comilt_ss();
+	test_mm_comineq_ss();
+	test_mm_ucomieq_ss();
+	test_mm_ucomige_ss();
+	test_mm_ucomigt_ss();
+	test_mm_ucomile_ss();
+	test_mm_ucomilt_ss();
+	test_mm_ucomineq_ss();
+
+	// SSE1 Convert instructions:
+	test_mm_cvtsi32_ss();
+	test_mm_cvt_si2ss();
+	test_mm_cvtss_si32();
+	test_mm_cvt_ss2si();
+	test_mm_cvtsi64_ss();
+	test_mm_cvtss_f32();
+	test_mm_cvtss_si64();
+	test_mm_cvttss_si32();
+	test_mm_cvtt_ss2si();
+	test_mm_cvttss_si64();
+
+	// SSE1 Misc instructions:
+	test_mm_movemask_ps();
+
+	// SSE1 Probability/Statistics instructions:
+	test_mm_max_ps();
+  test_mm_max_ss();
+  test_mm_min_ps();
+  test_mm_min_ss();
+
+	// SSE1 Swizzle instructions:
+	test_mm_shuffle_ps();
+  test_mm_unpackhi_ps();
+  test_mm_unpacklo_ps();
+
+	// Transposing a matrix via the xmmintrin.h-provided intrinsic.
+  test_MM_TRANSPOSE4_PS();
+#if 0
 	// SSE1 Load instructions:	
 	aeq(_mm_load_ps(arr), 4.f, 3.f, 2.f, 1.f); // 4-wide load from aligned address.
 	aeq(_mm_load_ps1(uarr), 2.f, 2.f, 2.f, 2.f); // Load scalar from unaligned address and populate 4-wide.
@@ -388,7 +858,7 @@ int main()
 	aeq(c1, 4.5f, 3.5f, 3.f, 4.f);
 	aeq(c2, 6.5f, 2.5f, 2.f, 6.f);
 	aeq(c3, 8.5f, 1.5f, 1.f, 8.f);
-
+#endif
 	// All done!
 	if (numFailures == 0)
 		printf("Success!\n");
