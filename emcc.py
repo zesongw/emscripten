@@ -1826,6 +1826,7 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
     if shared.Settings.RELOCATABLE or \
        shared.Settings.BUILD_AS_WORKER or \
        shared.Settings.USE_WEBGPU or \
+       shared.Settings.USE_WEBNN or \
        shared.Settings.USE_PTHREADS or \
        shared.Settings.OFFSCREENCANVAS_SUPPORT or \
        shared.Settings.LEGACY_GL_EMULATION or \
