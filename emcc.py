@@ -2190,6 +2190,7 @@ def phase_linker_setup(options, state, newargs, settings_map):
   if settings.RELOCATABLE or \
      settings.BUILD_AS_WORKER or \
      settings.USE_WEBGPU or \
+     settings.USE_WEBNN or \
      settings.USE_PTHREADS or \
      settings.OFFSCREENCANVAS_SUPPORT or \
      settings.LEGACY_GL_EMULATION or \
