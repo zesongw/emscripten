@@ -1564,6 +1564,7 @@
                 "strides",
                 "dilationsCount",
                 "dilations",
+                "autoPad",
                 "groups",
                 "inputLayout",
                 "filterLayout"
