@@ -48,6 +48,13 @@ typedef struct WebnnNeuralNetworkContextImpl* WebnnNeuralNetworkContext;
 typedef struct WebnnOperandImpl* WebnnOperand;
 typedef struct WebnnResultImpl* WebnnResult;
 
+typedef enum WebnnAutoPad {
+    WebnnAutoPad_Explicit = 0x00000000,
+    WebnnAutoPad_SameUpper = 0x00000001,
+    WebnnAutoPad_SameLower = 0x00000002,
+    WebnnAutoPad_Force32 = 0x7FFFFFFF
+} WebnnAutoPad;
+
 typedef enum WebnnCompileStatus {
     WebnnCompileStatus_Success = 0x00000000,
     WebnnCompileStatus_Error = 0x00000001,
@@ -132,6 +139,7 @@ typedef struct WebnnConv2dOptions {
     int32_t const * strides;
     uint32_t dilationsCount;
     int32_t const * dilations;
+    WebnnAutoPad autoPad;
     int32_t groups;
     WebnnInputOperandLayout inputLayout;
     WebnnFilterOperandLayout filterLayout;
@@ -178,6 +186,7 @@ typedef struct WebnnPool2dOptions {
     int32_t const * strides;
     uint32_t dilationsCount;
     int32_t const * dilations;
+    WebnnAutoPad autoPad;
     WebnnInputOperandLayout layout;
 } WebnnPool2dOptions;
 
@@ -205,11 +214,13 @@ typedef WebnnNamedOutputs (*WebnnProcCreateNamedOutputs)();
 
 // Procs of Compilation
 typedef void (*WebnnProcCompilationCompute)(WebnnCompilation compilation, WebnnNamedInputs inputs, WebnnComputeCallback callback, void * userdata, WebnnNamedOutputs outputs);
+typedef WebnnNamedResults (*WebnnProcCompilationComputeSync)(WebnnCompilation compilation, WebnnNamedInputs inputs, WebnnNamedOutputs outputs);
 typedef void (*WebnnProcCompilationReference)(WebnnCompilation compilation);
 typedef void (*WebnnProcCompilationRelease)(WebnnCompilation compilation);
 
 // Procs of Model
 typedef void (*WebnnProcModelCompile)(WebnnModel model, WebnnCompileCallback callback, void * userdata, WebnnCompilationOptions const * options);
+typedef WebnnCompilation (*WebnnProcModelCompileSync)(WebnnModel model, WebnnCompilationOptions const * options);
 typedef void (*WebnnProcModelReference)(WebnnModel model);
 typedef void (*WebnnProcModelRelease)(WebnnModel model);
 
@@ -286,11 +297,13 @@ WEBNN_EXPORT WebnnNamedOutputs webnnCreateNamedOutputs();
 
 // Methods of Compilation
 WEBNN_EXPORT void webnnCompilationCompute(WebnnCompilation compilation, WebnnNamedInputs inputs, WebnnComputeCallback callback, void * userdata, WebnnNamedOutputs outputs);
+WEBNN_EXPORT WebnnNamedResults webnnCompilationComputeSync(WebnnCompilation compilation, WebnnNamedInputs inputs, WebnnNamedOutputs outputs);
 WEBNN_EXPORT void webnnCompilationReference(WebnnCompilation compilation);
 WEBNN_EXPORT void webnnCompilationRelease(WebnnCompilation compilation);
 
 // Methods of Model
 WEBNN_EXPORT void webnnModelCompile(WebnnModel model, WebnnCompileCallback callback, void * userdata, WebnnCompilationOptions const * options);
+WEBNN_EXPORT WebnnCompilation webnnModelCompileSync(WebnnModel model, WebnnCompilationOptions const * options);
 WEBNN_EXPORT void webnnModelReference(WebnnModel model);
 WEBNN_EXPORT void webnnModelRelease(WebnnModel model);
 

@@ -58,18 +58,6 @@
       var h = makeGetValue('(' + struct + ' + 4)', offset, 'i32', false, true)
       return h + ' * 0x100000000 + ' + l
     },
-    makeI32Array: function(count, arrayPtr) {
-      var array = [];
-      for (var i = 0; i < count; ++i, arrayPtr += 4) {
-        array.push(this.makeGetI32('arrayPtr', 0));
-      }
-      return array;
-    },
-    makeArrayBufferView: function(offset, size, type = "float32") {
-      assert(type === "float32");
-      // TODO: support other array buffer view types.
-      return new Float32Array(HEAPU8, offset, size);
-    },
     makeCheck: function(str) {
       if (!ASSERTIONS) return '';
       return 'assert(' + str + ');';
@@ -135,6 +123,11 @@ var LibraryWebNN = {
       {{{ webnn.makeInitManager('Result') }}}
     },
 
+    AutoPad: [
+      'explicit',
+      'same-upper',
+      'same-lower',
+    ],
     CompileStatus: [
       'success',
       'error',
@@ -180,6 +173,20 @@ var LibraryWebNN = {
       'high_performance',
     ],
 
+    makeI32Array: function(count, arrayPtr) {
+      var array = [];
+      for (var i = 0; i < count; ++i, arrayPtr += 4) {
+        array.push({{{ webnn.makeGetI32('arrayPtr', 0) }}});
+      }
+      return array;
+    },
+
+    makeArrayBufferView: function(offset, byteSize, type = "float32") {
+      assert(type === "float32");
+      // TODO: support other array buffer view types.
+      return new Float32Array(HEAPU8.buffer, offset, byteSize / Float32Array.BYTES_PER_ELEMENT);
+    },
+
     makeCompilationOptions: function(ptr) {
       return {
         "powerPreference": this.PowerPreference[{{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnCompilationOptions.powerPreference) }}}],
@@ -195,28 +202,35 @@ var LibraryWebNN = {
 
     makeOperandDescriptor: function(ptr) {
       return {
-        "type": this.OperandType[{{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnOperandDescriptor.type) }}}],
-        "dimensions": webnn.makeI32Array(
-          {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnOperandDescriptor.dimensionsCount) }}},
-          {{{ makeGetValue('ptr', C_STRUCTS.WebnnOperandDescriptor.dimensions, '*') }}}
+        "type": this.OperandType[
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnOperandDescriptor.type) }}}
+        ],
+        "dimensions": this.makeI32Array(
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnOperandDescriptor.dimensionsCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.WebnnOperandDescriptor.dimensions, '*') }}}
         ),
-      }
+      };
     },
     
     makeConv2dOptions: function(ptr) {
       return {
-        "padding": webnn.makeI32Array(
-          {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnConv2dOptions.paddingCount) }}},
-          {{{ makeGetValue('ptr', C_STRUCTS.WebnnConv2dOptions.padding, '*') }}}
-        ),
-        "strides": webnn.makeI32Array(
+        "padding": this.AutoPad[
+            {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.autoPad) }}}
+          ] === 'explicit' ? this.makeI32Array(
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnConv2dOptions.paddingCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.WebnnConv2dOptions.padding, '*') }}}
+          ) : undefined,
+        "strides": this.makeI32Array(
           {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnConv2dOptions.stridesCount) }}},
           {{{ makeGetValue('ptr', C_STRUCTS.WebnnConv2dOptions.strides, '*') }}}
         ),
-        "dilations": webnn.makeI32Array(
+        "dilations": this.makeI32Array(
           {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnConv2dOptions.dilationsCount) }}},
           {{{ makeGetValue('ptr', C_STRUCTS.WebnnConv2dOptions.dilations, '*') }}}
         ),
+        "autoPad": this.AutoPad[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.autoPad) }}}
+        ],
         "groups": {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.groups) }}},
         "inputLayout": this.InputOperandLayout[
           {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.inputLayout) }}}
@@ -229,26 +243,30 @@ var LibraryWebNN = {
 
     makeInput: function(ptr) {
       return {
-        "buffer": webnn.makeArrayBufferView(
+        "buffer": this.makeArrayBufferView(
             {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}}, 
-            {{{ webnn.makeGetU64('ptr', C_STRUCTS.WebnnInput.size) }}}),
+            {{{ webnn.makeGetU64('ptr', C_STRUCTS.WebnnInput.size) }}}
+        ),
         "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}} === 0) ? undefined :
-            webnn.makeI32Array(
+            this.makeI32Array(
                 {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnInput.dimensionsCount) }}},
-                {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}}),
+                {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}}
+        ),
       };
     },
 
     makeOutput: function(ptr) {
       return {
         "buffer": ({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}} === 0) ? undefined :
-            webnn.makeArrayBufferView(
+            this.makeArrayBufferView(
                 {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}}, 
-                {{{ webnn.makeGetU64('ptr', C_STRUCTS.WebnnInput.size) }}}),
+                {{{ webnn.makeGetU64('ptr', C_STRUCTS.WebnnInput.size) }}}
+        ),
         "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}} === 0) ? undefined :
-            webnn.makeI32Array(
+            this.makeI32Array(
                 {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnInput.dimensionsCount) }}},
-                {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}}),
+                {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}}
+        ),
       };
     },
   },
@@ -271,15 +289,15 @@ var LibraryWebNN = {
   webnnModelBuilderInput: function(builderId, namePtr, descPtr) {
     var builder = WebNN.mgrModelBuilder.get(builderId);
     var name = UTF8ToString(namePtr);
-    var desc = makeOperandDescriptor(descPtr);
+    var desc = WebNN.makeOperandDescriptor(descPtr);
     var input = builder.input(name, desc);
     return WebNN.mgrOperand.create(input);
   },
 
   webnnModelBuilderConstant: function(builderId, descPtr, valuePtr, size) {
     var builder = WebNN.mgrModelBuilder.get(builderId);
-    var desc = makeOperandDescriptor(descPtr);
-    var buffer = webnn.makeArrayBufferView(valuePtr, size);
+    var desc = WebNN.makeOperandDescriptor(descPtr);
+    var buffer = WebNN.makeArrayBufferView(valuePtr, size);
     var constant = builder.constant(desc, buffer);
     return WebNN.mgrOperand.create(constant);
   },
@@ -288,7 +306,7 @@ var LibraryWebNN = {
     var builder = WebNN.mgrModelBuilder.get(builderId);
     var input = WebNN.mgrOperand.get(inputId);
     var filter = WebNN.mgrOperand.get(filterId);
-    var options = makeConv2dOptions(optionsPtr);
+    var options = WebNN.makeConv2dOptions(optionsPtr);
     var conv2d = builder.conv2d(input, filter, options);
     return WebNN.mgrOperand.create(conv2d);
   },
@@ -296,7 +314,7 @@ var LibraryWebNN = {
   webnnModelBuilderClamp: function(builderId, inputId, optionsPtr) {
     var builder = WebNN.mgrModelBuilder.get(builderId);
     var input = WebNN.mgrOperand.get(inputId);
-    var options = makeClampOptions(optionsPtr);
+    var options = WebNN.makeClampOptions(optionsPtr);
     var clamp = builder.clamp(input, options);
     return WebNN.mgrOperand.create(clamp);
   },
@@ -317,7 +335,7 @@ var LibraryWebNN = {
   webnnNamedInputsSet: function(namedInputsId, namePtr, inputPtr) {
     var namedInputs = WebNN.mgrNamedInputs.get(namedInputsId);
     var name = UTF8ToString(namePtr);
-    var input = makeInput(inputPtr);
+    var input = WebNN.makeInput(inputPtr);
     namedInputs[name] = input;
   },
 
@@ -327,9 +345,9 @@ var LibraryWebNN = {
   },
 
   webnnNamedOutputsSet: function(namedOutputsId, namePtr, outputPtr) {
-    var namedOutputs = WebNN.mgrNamedInputs.get(namedOutputsId);
+    var namedOutputs = WebNN.mgrNamedOutputs.get(namedOutputsId);
     var name = UTF8ToString(namePtr);
-    var output = makeOutput(outputPtr);
+    var output = WebNN.makeOutput(outputPtr);
     namedOutputs[name] = output;
   },
 
@@ -360,13 +378,13 @@ var LibraryWebNN = {
 
   webnnModelCompile: function(modelId, callback, userdata, optionsPtr) {
     var model = WebNN.mgrModel.get(modelId);
-    var options = makeCompilationOptions(optionsPtr);
+    var options = optionsPtr === 0 ? undefined : WebNN.makeCompilationOptions(optionsPtr);
     model.compile(options).then(function(compilation) {
       var compilationId = WebNN.mgrCompilation.create(compilation);
-      {{{ makeDynCall('vii', 'callback') }}}(0 /* WebnnCompileStatus_Success */, compilationId, 0, userdata);
+      {{{ makeDynCall('viiii', 'callback') }}}(0 /* WebnnCompileStatus_Success */, compilationId, 0, userdata);
     }, function(error) {
       var messagePtr = allocateUTF8(error.message);
-      {{{ makeDynCall('vii', 'callback') }}}(1 /* WebnnCompileStatus_Error */, 0, messagePtr, userdata);
+      {{{ makeDynCall('viiii', 'callback') }}}(1 /* WebnnCompileStatus_Error */, 0, messagePtr, userdata);
     });
   },
 
@@ -376,12 +394,39 @@ var LibraryWebNN = {
     var outputs = outputsId === 0 ? undefined : WebNN.mgrNamedOutputs.get(outputsId);
     compilation.compute(inputs, outputs).then(function(results) {
       // TODO: implement results
-      {{{ makeDynCall('vii', 'callback') }}}(0 /* WebnnComputeStatus_Success */, 0, 0, userdata);
+      {{{ makeDynCall('viiii', 'callback') }}}(0 /* WebnnComputeStatus_Success */, 0, 0, userdata);
     }, function(error) {
       var messagePtr = allocateUTF8(error.message);
-      {{{ makeDynCall('vii', 'callback') }}}(1 /* WebnnComputeStatus_Error */, 0, messagePtr, userdata);
+      {{{ makeDynCall('viiii', 'callback') }}}(1 /* WebnnComputeStatus_Error */, 0, messagePtr, userdata);
     });
   },
+
+  webnnModelCompileSync: function(modelId, optionsPtr) {
+    var model = WebNN.mgrModel.get(modelId);
+    var options = optionsPtr === 0 ? undefined : WebNN.makeCompilationOptions(optionsPtr);
+    try {
+      var compilation = model.compileSync(options);
+      return WebNN.mgrCompilation.create(compilation);
+    } catch (error) {
+      console.log('Model.compileSync failed: ' + error);
+      return 0;  // nullptr
+    }
+  },
+
+  webnnCompilationComputeSync: function(compilationId, inputsId, outputsId) {
+    var compilation = WebNN.mgrCompilation.get(compilationId);
+    var inputs = WebNN.mgrNamedInputs.get(inputsId);
+    var outputs = outputsId === 0 ? undefined : WebNN.mgrNamedOutputs.get(outputsId);
+    try {
+      var results = compilation.computeSync(inputs, outputs);
+      return WebNN.mgrNamedResults.create(results);
+    } catch (error) {
+      console.log('Model.computeSync failed: ' + error);
+      return 0;   // nullptr
+    }
+    
+  },
+
 };
 
 autoAddDeps(LibraryWebNN, '$WebNN');
