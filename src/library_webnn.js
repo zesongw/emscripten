@@ -245,7 +245,7 @@ var LibraryWebNN = {
       return {
         "buffer": this.makeArrayBufferView(
             {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}}, 
-            {{{ webnn.makeGetU64('ptr', C_STRUCTS.WebnnInput.size) }}}
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnInput.size) }}}
         ),
         "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}} === 0) ? undefined :
             this.makeI32Array(
@@ -260,7 +260,7 @@ var LibraryWebNN = {
         "buffer": ({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}} === 0) ? undefined :
             this.makeArrayBufferView(
                 {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}}, 
-                {{{ webnn.makeGetU64('ptr', C_STRUCTS.WebnnInput.size) }}}
+                {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnInput.size) }}}
         ),
         "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}} === 0) ? undefined :
             this.makeI32Array(
