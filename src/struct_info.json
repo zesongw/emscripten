@@ -1376,20 +1376,20 @@
         "file": "webnn/webnn.h",
         "defines": [],
         "structs": {
-            "WebnnBatchNormOptions": [
+            "MLBatchNormOptions": [
                 "scale",
                 "bias",
                 "axis",
                 "epsilon"
             ],
-            "WebnnClampOptions": [
+            "MLClampOptions": [
                 "minValue",
                 "maxValue"
             ],
-            "WebnnCompilationOptions": [
+            "MLContextOptions": [
                 "powerPreference"
             ],
-            "WebnnConv2dOptions": [
+            "MLConv2dOptions": [
                 "paddingCount",
                 "padding",
                 "stridesCount",
@@ -1401,34 +1401,34 @@
                 "inputLayout",
                 "filterLayout"
             ],
-            "WebnnGemmOptions": [
+            "MLGemmOptions": [
                 "c",
                 "alpha",
                 "beta",
                 "aTranspose",
                 "bTranspose"
             ],
-            "WebnnInput": [
+            "MLInput": [
                 "buffer",
                 "size",
                 "dimensions",
                 "dimensionsCount"
             ],
-            "WebnnLeakyReluOptions": [
+            "MLLeakyReluOptions": [
                 "alpha"
             ],
-            "WebnnOperandDescriptor": [
+            "MLOperandDescriptor": [
                 "type",
                 "dimensions",
                 "dimensionsCount"
             ],
-            "WebnnOutput": [
+            "MLOutput": [
                 "buffer",
                 "size",
                 "dimensions",
                 "dimensionsCount"
             ],
-            "WebnnPool2dOptions": [
+            "MLPool2dOptions": [
                 "windowDimensionsCount",
                 "windowDimensions",
                 "paddingCount",
@@ -1437,9 +1437,10 @@
                 "strides",
                 "dilationsCount",
                 "dilations",
+                "autoPad",
                 "layout"
             ],
-            "WebnnTransposeOptions": [
+            "MLTransposeOptions": [
                 "permutationCount",
                 "permutation"
             ]

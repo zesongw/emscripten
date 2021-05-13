@@ -37,147 +37,149 @@
 
 typedef uint32_t WEBNNFlags;
 
-typedef struct WebnnCompilationImpl* WebnnCompilation;
-typedef struct WebnnModelImpl* WebnnModel;
-typedef struct WebnnModelBuilderImpl* WebnnModelBuilder;
-typedef struct WebnnNamedInputsImpl* WebnnNamedInputs;
-typedef struct WebnnNamedOperandsImpl* WebnnNamedOperands;
-typedef struct WebnnNamedOutputsImpl* WebnnNamedOutputs;
-typedef struct WebnnNamedResultsImpl* WebnnNamedResults;
-typedef struct WebnnNeuralNetworkContextImpl* WebnnNeuralNetworkContext;
-typedef struct WebnnOperandImpl* WebnnOperand;
-typedef struct WebnnResultImpl* WebnnResult;
+typedef struct MLContextImpl* MLContext;
+typedef struct MLGraphImpl* MLGraph;
+typedef struct MLGraphBuilderImpl* MLGraphBuilder;
+typedef struct MLNamedInputsImpl* MLNamedInputs;
+typedef struct MLNamedOperandsImpl* MLNamedOperands;
+typedef struct MLNamedOutputsImpl* MLNamedOutputs;
+typedef struct MLNamedResultsImpl* MLNamedResults;
+typedef struct MLOperandImpl* MLOperand;
+typedef struct MLResultImpl* MLResult;
 
-typedef enum WebnnAutoPad {
-    WebnnAutoPad_Explicit = 0x00000000,
-    WebnnAutoPad_SameUpper = 0x00000001,
-    WebnnAutoPad_SameLower = 0x00000002,
-    WebnnAutoPad_Force32 = 0x7FFFFFFF
-} WebnnAutoPad;
+typedef enum MLAutoPad {
+    MLAutoPad_Explicit = 0x00000000,
+    MLAutoPad_SameUpper = 0x00000001,
+    MLAutoPad_SameLower = 0x00000002,
+    MLAutoPad_Force32 = 0x7FFFFFFF
+} MLAutoPad;
 
-typedef enum WebnnCompileStatus {
-    WebnnCompileStatus_Success = 0x00000000,
-    WebnnCompileStatus_Error = 0x00000001,
-    WebnnCompileStatus_ContextLost = 0x00000002,
-    WebnnCompileStatus_Unknown = 0x00000003,
-    WebnnCompileStatus_Force32 = 0x7FFFFFFF
-} WebnnCompileStatus;
+typedef enum MLBuildGraphStatus {
+    MLBuildGraphStatus_Success = 0x00000000,
+    MLBuildGraphStatus_Error = 0x00000001,
+    MLBuildGraphStatus_ContextLost = 0x00000002,
+    MLBuildGraphStatus_Unknown = 0x00000003,
+    MLBuildGraphStatus_Force32 = 0x7FFFFFFF
+} MLBuildGraphStatus;
 
-typedef enum WebnnComputeStatus {
-    WebnnComputeStatus_Success = 0x00000000,
-    WebnnComputeStatus_Error = 0x00000001,
-    WebnnComputeStatus_ContextLost = 0x00000002,
-    WebnnComputeStatus_Unknown = 0x00000003,
-    WebnnComputeStatus_Force32 = 0x7FFFFFFF
-} WebnnComputeStatus;
+typedef enum MLComputeGraphStatus {
+    MLComputeGraphStatus_Success = 0x00000000,
+    MLComputeGraphStatus_Error = 0x00000001,
+    MLComputeGraphStatus_ContextLost = 0x00000002,
+    MLComputeGraphStatus_Unknown = 0x00000003,
+    MLComputeGraphStatus_Force32 = 0x7FFFFFFF
+} MLComputeGraphStatus;
 
-typedef enum WebnnErrorFilter {
-    WebnnErrorFilter_None = 0x00000000,
-    WebnnErrorFilter_Validation = 0x00000001,
-    WebnnErrorFilter_OutOfMemory = 0x00000002,
-    WebnnErrorFilter_Force32 = 0x7FFFFFFF
-} WebnnErrorFilter;
+typedef enum MLErrorFilter {
+    MLErrorFilter_None = 0x00000000,
+    MLErrorFilter_Validation = 0x00000001,
+    MLErrorFilter_OutOfMemory = 0x00000002,
+    MLErrorFilter_Force32 = 0x7FFFFFFF
+} MLErrorFilter;
 
-typedef enum WebnnErrorType {
-    WebnnErrorType_NoError = 0x00000000,
-    WebnnErrorType_Validation = 0x00000001,
-    WebnnErrorType_OutOfMemory = 0x00000002,
-    WebnnErrorType_Unknown = 0x00000003,
-    WebnnErrorType_DeviceLost = 0x00000004,
-    WebnnErrorType_Force32 = 0x7FFFFFFF
-} WebnnErrorType;
+typedef enum MLErrorType {
+    MLErrorType_NoError = 0x00000000,
+    MLErrorType_Validation = 0x00000001,
+    MLErrorType_OutOfMemory = 0x00000002,
+    MLErrorType_Unknown = 0x00000003,
+    MLErrorType_DeviceLost = 0x00000004,
+    MLErrorType_Force32 = 0x7FFFFFFF
+} MLErrorType;
 
-typedef enum WebnnFilterOperandLayout {
-    WebnnFilterOperandLayout_Oihw = 0x00000000,
-    WebnnFilterOperandLayout_Hwio = 0x00000001,
-    WebnnFilterOperandLayout_Ohwi = 0x00000002,
-    WebnnFilterOperandLayout_Force32 = 0x7FFFFFFF
-} WebnnFilterOperandLayout;
+typedef enum MLFilterOperandLayout {
+    MLFilterOperandLayout_Oihw = 0x00000000,
+    MLFilterOperandLayout_Hwio = 0x00000001,
+    MLFilterOperandLayout_Ohwi = 0x00000002,
+    MLFilterOperandLayout_Ihwo = 0x00000003,
+    MLFilterOperandLayout_Force32 = 0x7FFFFFFF
+} MLFilterOperandLayout;
 
-typedef enum WebnnInputOperandLayout {
-    WebnnInputOperandLayout_Nchw = 0x00000000,
-    WebnnInputOperandLayout_Nhwc = 0x00000001,
-    WebnnInputOperandLayout_Force32 = 0x7FFFFFFF
-} WebnnInputOperandLayout;
+typedef enum MLInputOperandLayout {
+    MLInputOperandLayout_Nchw = 0x00000000,
+    MLInputOperandLayout_Nhwc = 0x00000001,
+    MLInputOperandLayout_Force32 = 0x7FFFFFFF
+} MLInputOperandLayout;
 
-typedef enum WebnnOperandType {
-    WebnnOperandType_Float32 = 0x00000000,
-    WebnnOperandType_Float16 = 0x00000001,
-    WebnnOperandType_Int32 = 0x00000002,
-    WebnnOperandType_Uint32 = 0x00000003,
-    WebnnOperandType_Force32 = 0x7FFFFFFF
-} WebnnOperandType;
+typedef enum MLOperandType {
+    MLOperandType_Float32 = 0x00000000,
+    MLOperandType_Float16 = 0x00000001,
+    MLOperandType_Int32 = 0x00000002,
+    MLOperandType_Uint32 = 0x00000003,
+    MLOperandType_Int8 = 0x00000004,
+    MLOperandType_Uint8 = 0x00000005,
+    MLOperandType_Force32 = 0x7FFFFFFF
+} MLOperandType;
 
-typedef enum WebnnPowerPreference {
-    WebnnPowerPreference_Default = 0x00000000,
-    WebnnPowerPreference_Low_power = 0x00000001,
-    WebnnPowerPreference_High_performance = 0x00000002,
-    WebnnPowerPreference_Force32 = 0x7FFFFFFF
-} WebnnPowerPreference;
+typedef enum MLPowerPreference {
+    MLPowerPreference_Default = 0x00000000,
+    MLPowerPreference_High_performance = 0x00000001,
+    MLPowerPreference_Low_power = 0x00000002,
+    MLPowerPreference_Force32 = 0x7FFFFFFF
+} MLPowerPreference;
 
 
-typedef struct WebnnBatchNormOptions {
-    WebnnOperand scale;
-    WebnnOperand bias;
+typedef struct MLBatchNormOptions {
+    MLOperand scale;
+    MLOperand bias;
     uint32_t axis;
     float epsilon;
-} WebnnBatchNormOptions;
+} MLBatchNormOptions;
 
-typedef struct WebnnClampOptions {
-    WebnnOperand minValue;
-    WebnnOperand maxValue;
-} WebnnClampOptions;
+typedef struct MLClampOptions {
+    MLOperand minValue;
+    MLOperand maxValue;
+} MLClampOptions;
 
-typedef struct WebnnCompilationOptions {
-    WebnnPowerPreference powerPreference;
-} WebnnCompilationOptions;
+typedef struct MLContextOptions {
+    MLPowerPreference powerPreference;
+} MLContextOptions;
 
-typedef struct WebnnConv2dOptions {
+typedef struct MLConv2dOptions {
     uint32_t paddingCount;
     int32_t const * padding;
     uint32_t stridesCount;
     int32_t const * strides;
     uint32_t dilationsCount;
     int32_t const * dilations;
-    WebnnAutoPad autoPad;
+    MLAutoPad autoPad;
     int32_t groups;
-    WebnnInputOperandLayout inputLayout;
-    WebnnFilterOperandLayout filterLayout;
-} WebnnConv2dOptions;
+    MLInputOperandLayout inputLayout;
+    MLFilterOperandLayout filterLayout;
+} MLConv2dOptions;
 
-typedef struct WebnnGemmOptions {
-    WebnnOperand c;
+typedef struct MLGemmOptions {
+    MLOperand c;
     float alpha;
     float beta;
     bool aTranspose;
     bool bTranspose;
-} WebnnGemmOptions;
+} MLGemmOptions;
 
-typedef struct WebnnInput {
+typedef struct MLInput {
     void const * buffer;
     size_t size;
     int32_t const * dimensions;
     uint32_t dimensionsCount;
-} WebnnInput;
+} MLInput;
 
-typedef struct WebnnLeakyReluOptions {
+typedef struct MLLeakyReluOptions {
     float alpha;
-} WebnnLeakyReluOptions;
+} MLLeakyReluOptions;
 
-typedef struct WebnnOperandDescriptor {
-    WebnnOperandType type;
+typedef struct MLOperandDescriptor {
+    MLOperandType type;
     int32_t const * dimensions;
     uint32_t dimensionsCount;
-} WebnnOperandDescriptor;
+} MLOperandDescriptor;
 
-typedef struct WebnnOutput {
+typedef struct MLOutput {
     void * buffer;
     size_t size;
     int32_t const * dimensions;
     uint32_t dimensionsCount;
-} WebnnOutput;
+} MLOutput;
 
-typedef struct WebnnPool2dOptions {
+typedef struct MLPool2dOptions {
     uint32_t windowDimensionsCount;
     int32_t const * windowDimensions;
     uint32_t paddingCount;
@@ -186,189 +188,179 @@ typedef struct WebnnPool2dOptions {
     int32_t const * strides;
     uint32_t dilationsCount;
     int32_t const * dilations;
-    WebnnAutoPad autoPad;
-    WebnnInputOperandLayout layout;
-} WebnnPool2dOptions;
+    MLAutoPad autoPad;
+    MLInputOperandLayout layout;
+} MLPool2dOptions;
 
-typedef struct WebnnTransposeOptions {
+typedef struct MLTransposeOptions {
     uint32_t permutationCount;
     int32_t const * permutation;
-} WebnnTransposeOptions;
+} MLTransposeOptions;
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void (*WebnnCompileCallback)(WebnnCompileStatus status, WebnnCompilation compilation, char const * message, void * userdata);
-typedef void (*WebnnComputeCallback)(WebnnComputeStatus status, WebnnNamedResults outputs, char const * message, void * userdata);
-typedef void (*WebnnErrorCallback)(WebnnErrorType type, char const * message, void * userdata);
+typedef void (*MLBuildGraphCallback)(MLBuildGraphStatus status, MLGraph graph, char const * message, void * userdata);
+typedef void (*MLComputeGraphCallback)(MLComputeGraphStatus status, MLNamedResults outputs, char const * message, void * userdata);
+typedef void (*MLErrorCallback)(MLErrorType type, char const * message, void * userdata);
 
 typedef void (*WebnnProc)(void);
 
 #if !defined(WEBNN_SKIP_PROCS)
 
-typedef WebnnNamedInputs (*WebnnProcCreateNamedInputs)();
-typedef WebnnNamedOperands (*WebnnProcCreateNamedOperands)();
-typedef WebnnNamedOutputs (*WebnnProcCreateNamedOutputs)();
+typedef MLGraphBuilder (*WebnnProcCreateGraphBuilder)(MLContext context);
+typedef MLNamedInputs (*WebnnProcCreateNamedInputs)();
+typedef MLNamedOperands (*WebnnProcCreateNamedOperands)();
+typedef MLNamedOutputs (*WebnnProcCreateNamedOutputs)();
 
-// Procs of Compilation
-typedef void (*WebnnProcCompilationCompute)(WebnnCompilation compilation, WebnnNamedInputs inputs, WebnnComputeCallback callback, void * userdata, WebnnNamedOutputs outputs);
-typedef WebnnNamedResults (*WebnnProcCompilationComputeSync)(WebnnCompilation compilation, WebnnNamedInputs inputs, WebnnNamedOutputs outputs);
-typedef void (*WebnnProcCompilationReference)(WebnnCompilation compilation);
-typedef void (*WebnnProcCompilationRelease)(WebnnCompilation compilation);
+// Procs of Context
+typedef bool (*WebnnProcContextPopErrorScope)(MLContext context, MLErrorCallback callback, void * userdata);
+typedef void (*WebnnProcContextPushErrorScope)(MLContext context, MLErrorFilter filter);
+typedef void (*WebnnProcContextSetUncapturedErrorCallback)(MLContext context, MLErrorCallback callback, void * userdata);
+typedef void (*WebnnProcContextReference)(MLContext context);
+typedef void (*WebnnProcContextRelease)(MLContext context);
 
-// Procs of Model
-typedef void (*WebnnProcModelCompile)(WebnnModel model, WebnnCompileCallback callback, void * userdata, WebnnCompilationOptions const * options);
-typedef WebnnCompilation (*WebnnProcModelCompileSync)(WebnnModel model, WebnnCompilationOptions const * options);
-typedef void (*WebnnProcModelReference)(WebnnModel model);
-typedef void (*WebnnProcModelRelease)(WebnnModel model);
+// Procs of Graph
+typedef void (*WebnnProcGraphCompute)(MLGraph graph, MLNamedInputs inputs, MLComputeGraphCallback callback, void * userdata, MLNamedOutputs outputs);
+typedef MLComputeGraphStatus (*WebnnProcGraphComputeSync)(MLGraph graph, MLNamedInputs inputs, MLNamedOutputs outputs);
+typedef void (*WebnnProcGraphReference)(MLGraph graph);
+typedef void (*WebnnProcGraphRelease)(MLGraph graph);
 
-// Procs of ModelBuilder
-typedef WebnnOperand (*WebnnProcModelBuilderAdd)(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b);
-typedef WebnnOperand (*WebnnProcModelBuilderAveragePool2d)(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnPool2dOptions const * options);
-typedef WebnnOperand (*WebnnProcModelBuilderBatchNorm)(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnOperand mean, WebnnOperand variance, WebnnBatchNormOptions const * options);
-typedef WebnnOperand (*WebnnProcModelBuilderClamp)(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnClampOptions const * options);
-typedef WebnnOperand (*WebnnProcModelBuilderConcat)(WebnnModelBuilder modelBuilder, uint32_t inputsCount, WebnnOperand const * inputs, uint32_t axis);
-typedef WebnnOperand (*WebnnProcModelBuilderConstant)(WebnnModelBuilder modelBuilder, WebnnOperandDescriptor const * desc, void const * value, size_t size);
-typedef WebnnOperand (*WebnnProcModelBuilderConv2d)(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnOperand filter, WebnnConv2dOptions const * options);
-typedef WebnnModel (*WebnnProcModelBuilderCreateModel)(WebnnModelBuilder modelBuilder, WebnnNamedOperands namedOperands);
-typedef WebnnOperand (*WebnnProcModelBuilderGemm)(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b, WebnnGemmOptions const * options);
-typedef WebnnOperand (*WebnnProcModelBuilderInput)(WebnnModelBuilder modelBuilder, char const * name, WebnnOperandDescriptor const * desc);
-typedef WebnnOperand (*WebnnProcModelBuilderLeakyRelu)(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnLeakyReluOptions const * options);
-typedef WebnnOperand (*WebnnProcModelBuilderMatmul)(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b);
-typedef WebnnOperand (*WebnnProcModelBuilderMaxPool2d)(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnPool2dOptions const * options);
-typedef WebnnOperand (*WebnnProcModelBuilderMul)(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b);
-typedef WebnnOperand (*WebnnProcModelBuilderRelu)(WebnnModelBuilder modelBuilder, WebnnOperand input);
-typedef WebnnOperand (*WebnnProcModelBuilderReshape)(WebnnModelBuilder modelBuilder, WebnnOperand input, int32_t const * newShape, uint32_t newShapeCount);
-typedef WebnnOperand (*WebnnProcModelBuilderSoftmax)(WebnnModelBuilder modelBuilder, WebnnOperand input);
-typedef WebnnOperand (*WebnnProcModelBuilderSub)(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b);
-typedef WebnnOperand (*WebnnProcModelBuilderTranspose)(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnTransposeOptions const * options);
-typedef void (*WebnnProcModelBuilderReference)(WebnnModelBuilder modelBuilder);
-typedef void (*WebnnProcModelBuilderRelease)(WebnnModelBuilder modelBuilder);
+// Procs of GraphBuilder
+typedef MLOperand (*WebnnProcGraphBuilderAdd)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
+typedef MLOperand (*WebnnProcGraphBuilderAveragePool2d)(MLGraphBuilder graphBuilder, MLOperand input, MLPool2dOptions const * options);
+typedef MLOperand (*WebnnProcGraphBuilderBatchNorm)(MLGraphBuilder graphBuilder, MLOperand input, MLOperand mean, MLOperand variance, MLBatchNormOptions const * options);
+typedef void (*WebnnProcGraphBuilderBuild)(MLGraphBuilder graphBuilder, MLNamedOperands namedOperands, MLBuildGraphCallback callback, void * userdata);
+typedef MLGraph (*WebnnProcGraphBuilderBuildSync)(MLGraphBuilder graphBuilder, MLNamedOperands namedOperands);
+typedef MLOperand (*WebnnProcGraphBuilderClamp)(MLGraphBuilder graphBuilder, MLOperand input, MLClampOptions const * options);
+typedef MLOperand (*WebnnProcGraphBuilderConcat)(MLGraphBuilder graphBuilder, uint32_t inputsCount, MLOperand const * inputs, uint32_t axis);
+typedef MLOperand (*WebnnProcGraphBuilderConstant)(MLGraphBuilder graphBuilder, MLOperandDescriptor const * desc, void const * value, size_t size);
+typedef MLOperand (*WebnnProcGraphBuilderConv2d)(MLGraphBuilder graphBuilder, MLOperand input, MLOperand filter, MLConv2dOptions const * options);
+typedef MLOperand (*WebnnProcGraphBuilderGemm)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b, MLGemmOptions const * options);
+typedef MLOperand (*WebnnProcGraphBuilderInput)(MLGraphBuilder graphBuilder, char const * name, MLOperandDescriptor const * desc);
+typedef MLOperand (*WebnnProcGraphBuilderLeakyRelu)(MLGraphBuilder graphBuilder, MLOperand input, MLLeakyReluOptions const * options);
+typedef MLOperand (*WebnnProcGraphBuilderMatmul)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
+typedef MLOperand (*WebnnProcGraphBuilderMaxPool2d)(MLGraphBuilder graphBuilder, MLOperand input, MLPool2dOptions const * options);
+typedef MLOperand (*WebnnProcGraphBuilderMul)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
+typedef MLOperand (*WebnnProcGraphBuilderRelu)(MLGraphBuilder graphBuilder, MLOperand input);
+typedef MLOperand (*WebnnProcGraphBuilderReshape)(MLGraphBuilder graphBuilder, MLOperand input, int32_t const * newShape, uint32_t newShapeCount);
+typedef MLOperand (*WebnnProcGraphBuilderSoftmax)(MLGraphBuilder graphBuilder, MLOperand input);
+typedef MLOperand (*WebnnProcGraphBuilderSub)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
+typedef MLOperand (*WebnnProcGraphBuilderTranspose)(MLGraphBuilder graphBuilder, MLOperand input, MLTransposeOptions const * options);
+typedef void (*WebnnProcGraphBuilderReference)(MLGraphBuilder graphBuilder);
+typedef void (*WebnnProcGraphBuilderRelease)(MLGraphBuilder graphBuilder);
 
 // Procs of NamedInputs
-typedef void (*WebnnProcNamedInputsSet)(WebnnNamedInputs namedInputs, char const * name, WebnnInput const * input);
-typedef void (*WebnnProcNamedInputsReference)(WebnnNamedInputs namedInputs);
-typedef void (*WebnnProcNamedInputsRelease)(WebnnNamedInputs namedInputs);
+typedef void (*WebnnProcNamedInputsSet)(MLNamedInputs namedInputs, char const * name, MLInput const * input);
+typedef void (*WebnnProcNamedInputsReference)(MLNamedInputs namedInputs);
+typedef void (*WebnnProcNamedInputsRelease)(MLNamedInputs namedInputs);
 
 // Procs of NamedOperands
-typedef void (*WebnnProcNamedOperandsSet)(WebnnNamedOperands namedOperands, char const * name, WebnnOperand operand);
-typedef void (*WebnnProcNamedOperandsReference)(WebnnNamedOperands namedOperands);
-typedef void (*WebnnProcNamedOperandsRelease)(WebnnNamedOperands namedOperands);
+typedef void (*WebnnProcNamedOperandsSet)(MLNamedOperands namedOperands, char const * name, MLOperand operand);
+typedef void (*WebnnProcNamedOperandsReference)(MLNamedOperands namedOperands);
+typedef void (*WebnnProcNamedOperandsRelease)(MLNamedOperands namedOperands);
 
 // Procs of NamedOutputs
-typedef void (*WebnnProcNamedOutputsSet)(WebnnNamedOutputs namedOutputs, char const * name, WebnnOutput const * output);
-typedef void (*WebnnProcNamedOutputsReference)(WebnnNamedOutputs namedOutputs);
-typedef void (*WebnnProcNamedOutputsRelease)(WebnnNamedOutputs namedOutputs);
+typedef void (*WebnnProcNamedOutputsSet)(MLNamedOutputs namedOutputs, char const * name, MLOutput const * output);
+typedef void (*WebnnProcNamedOutputsReference)(MLNamedOutputs namedOutputs);
+typedef void (*WebnnProcNamedOutputsRelease)(MLNamedOutputs namedOutputs);
 
 // Procs of NamedResults
-typedef WebnnResult (*WebnnProcNamedResultsGet)(WebnnNamedResults namedResults, char const * name);
-typedef void (*WebnnProcNamedResultsReference)(WebnnNamedResults namedResults);
-typedef void (*WebnnProcNamedResultsRelease)(WebnnNamedResults namedResults);
-
-// Procs of NeuralNetworkContext
-typedef WebnnModelBuilder (*WebnnProcNeuralNetworkContextCreateModelBuilder)(WebnnNeuralNetworkContext neuralNetworkContext);
-typedef bool (*WebnnProcNeuralNetworkContextPopErrorScope)(WebnnNeuralNetworkContext neuralNetworkContext, WebnnErrorCallback callback, void * userdata);
-typedef void (*WebnnProcNeuralNetworkContextPushErrorScope)(WebnnNeuralNetworkContext neuralNetworkContext, WebnnErrorFilter filter);
-typedef void (*WebnnProcNeuralNetworkContextSetUncapturedErrorCallback)(WebnnNeuralNetworkContext neuralNetworkContext, WebnnErrorCallback callback, void * userdata);
-typedef void (*WebnnProcNeuralNetworkContextReference)(WebnnNeuralNetworkContext neuralNetworkContext);
-typedef void (*WebnnProcNeuralNetworkContextRelease)(WebnnNeuralNetworkContext neuralNetworkContext);
+typedef MLResult (*WebnnProcNamedResultsGet)(MLNamedResults namedResults, char const * name);
+typedef void (*WebnnProcNamedResultsReference)(MLNamedResults namedResults);
+typedef void (*WebnnProcNamedResultsRelease)(MLNamedResults namedResults);
 
 // Procs of Operand
-typedef void (*WebnnProcOperandReference)(WebnnOperand operand);
-typedef void (*WebnnProcOperandRelease)(WebnnOperand operand);
+typedef void (*WebnnProcOperandReference)(MLOperand operand);
+typedef void (*WebnnProcOperandRelease)(MLOperand operand);
 
 // Procs of Result
-typedef const void* (*WebnnProcResultBuffer)(WebnnResult result);
-typedef uint32_t (*WebnnProcResultBufferSize)(WebnnResult result);
-typedef const int32_t* (*WebnnProcResultDimensions)(WebnnResult result);
-typedef uint32_t (*WebnnProcResultDimensionsSize)(WebnnResult result);
-typedef void (*WebnnProcResultReference)(WebnnResult result);
-typedef void (*WebnnProcResultRelease)(WebnnResult result);
+typedef const void* (*WebnnProcResultBuffer)(MLResult result);
+typedef uint32_t (*WebnnProcResultBufferSize)(MLResult result);
+typedef const int32_t* (*WebnnProcResultDimensions)(MLResult result);
+typedef uint32_t (*WebnnProcResultDimensionsSize)(MLResult result);
+typedef void (*WebnnProcResultReference)(MLResult result);
+typedef void (*WebnnProcResultRelease)(MLResult result);
 
 #endif  // !defined(WEBNN_SKIP_PROCS)
 
 #if !defined(WEBNN_SKIP_DECLARATIONS)
 
-WEBNN_EXPORT WebnnNamedInputs webnnCreateNamedInputs();
-WEBNN_EXPORT WebnnNamedOperands webnnCreateNamedOperands();
-WEBNN_EXPORT WebnnNamedOutputs webnnCreateNamedOutputs();
+WEBNN_EXPORT MLGraphBuilder webnnCreateGraphBuilder(MLContext context);
+WEBNN_EXPORT MLNamedInputs webnnCreateNamedInputs();
+WEBNN_EXPORT MLNamedOperands webnnCreateNamedOperands();
+WEBNN_EXPORT MLNamedOutputs webnnCreateNamedOutputs();
 
-// Methods of Compilation
-WEBNN_EXPORT void webnnCompilationCompute(WebnnCompilation compilation, WebnnNamedInputs inputs, WebnnComputeCallback callback, void * userdata, WebnnNamedOutputs outputs);
-WEBNN_EXPORT WebnnNamedResults webnnCompilationComputeSync(WebnnCompilation compilation, WebnnNamedInputs inputs, WebnnNamedOutputs outputs);
-WEBNN_EXPORT void webnnCompilationReference(WebnnCompilation compilation);
-WEBNN_EXPORT void webnnCompilationRelease(WebnnCompilation compilation);
+// Methods of Context
+WEBNN_EXPORT bool mlContextPopErrorScope(MLContext context, MLErrorCallback callback, void * userdata);
+WEBNN_EXPORT void mlContextPushErrorScope(MLContext context, MLErrorFilter filter);
+WEBNN_EXPORT void mlContextSetUncapturedErrorCallback(MLContext context, MLErrorCallback callback, void * userdata);
+WEBNN_EXPORT void mlContextReference(MLContext context);
+WEBNN_EXPORT void mlContextRelease(MLContext context);
 
-// Methods of Model
-WEBNN_EXPORT void webnnModelCompile(WebnnModel model, WebnnCompileCallback callback, void * userdata, WebnnCompilationOptions const * options);
-WEBNN_EXPORT WebnnCompilation webnnModelCompileSync(WebnnModel model, WebnnCompilationOptions const * options);
-WEBNN_EXPORT void webnnModelReference(WebnnModel model);
-WEBNN_EXPORT void webnnModelRelease(WebnnModel model);
+// Methods of Graph
+WEBNN_EXPORT void mlGraphCompute(MLGraph graph, MLNamedInputs inputs, MLComputeGraphCallback callback, void * userdata, MLNamedOutputs outputs);
+WEBNN_EXPORT MLComputeGraphStatus mlGraphComputeSync(MLGraph graph, MLNamedInputs inputs, MLNamedOutputs outputs);
+WEBNN_EXPORT void mlGraphReference(MLGraph graph);
+WEBNN_EXPORT void mlGraphRelease(MLGraph graph);
 
-// Methods of ModelBuilder
-WEBNN_EXPORT WebnnOperand webnnModelBuilderAdd(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderAveragePool2d(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnPool2dOptions const * options);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderBatchNorm(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnOperand mean, WebnnOperand variance, WebnnBatchNormOptions const * options);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderClamp(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnClampOptions const * options);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderConcat(WebnnModelBuilder modelBuilder, uint32_t inputsCount, WebnnOperand const * inputs, uint32_t axis);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderConstant(WebnnModelBuilder modelBuilder, WebnnOperandDescriptor const * desc, void const * value, size_t size);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderConv2d(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnOperand filter, WebnnConv2dOptions const * options);
-WEBNN_EXPORT WebnnModel webnnModelBuilderCreateModel(WebnnModelBuilder modelBuilder, WebnnNamedOperands namedOperands);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderGemm(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b, WebnnGemmOptions const * options);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderInput(WebnnModelBuilder modelBuilder, char const * name, WebnnOperandDescriptor const * desc);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderLeakyRelu(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnLeakyReluOptions const * options);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderMatmul(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderMaxPool2d(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnPool2dOptions const * options);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderMul(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderRelu(WebnnModelBuilder modelBuilder, WebnnOperand input);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderReshape(WebnnModelBuilder modelBuilder, WebnnOperand input, int32_t const * newShape, uint32_t newShapeCount);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderSoftmax(WebnnModelBuilder modelBuilder, WebnnOperand input);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderSub(WebnnModelBuilder modelBuilder, WebnnOperand a, WebnnOperand b);
-WEBNN_EXPORT WebnnOperand webnnModelBuilderTranspose(WebnnModelBuilder modelBuilder, WebnnOperand input, WebnnTransposeOptions const * options);
-WEBNN_EXPORT void webnnModelBuilderReference(WebnnModelBuilder modelBuilder);
-WEBNN_EXPORT void webnnModelBuilderRelease(WebnnModelBuilder modelBuilder);
+// Methods of GraphBuilder
+WEBNN_EXPORT MLOperand mlGraphBuilderAdd(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
+WEBNN_EXPORT MLOperand mlGraphBuilderAveragePool2d(MLGraphBuilder graphBuilder, MLOperand input, MLPool2dOptions const * options);
+WEBNN_EXPORT MLOperand mlGraphBuilderBatchNorm(MLGraphBuilder graphBuilder, MLOperand input, MLOperand mean, MLOperand variance, MLBatchNormOptions const * options);
+WEBNN_EXPORT void mlGraphBuilderBuild(MLGraphBuilder graphBuilder, MLNamedOperands namedOperands, MLBuildGraphCallback callback, void * userdata);
+WEBNN_EXPORT MLGraph mlGraphBuilderBuildSync(MLGraphBuilder graphBuilder, MLNamedOperands namedOperands);
+WEBNN_EXPORT MLOperand mlGraphBuilderClamp(MLGraphBuilder graphBuilder, MLOperand input, MLClampOptions const * options);
+WEBNN_EXPORT MLOperand mlGraphBuilderConcat(MLGraphBuilder graphBuilder, uint32_t inputsCount, MLOperand const * inputs, uint32_t axis);
+WEBNN_EXPORT MLOperand mlGraphBuilderConstant(MLGraphBuilder graphBuilder, MLOperandDescriptor const * desc, void const * value, size_t size);
+WEBNN_EXPORT MLOperand mlGraphBuilderConv2d(MLGraphBuilder graphBuilder, MLOperand input, MLOperand filter, MLConv2dOptions const * options);
+WEBNN_EXPORT MLOperand mlGraphBuilderGemm(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b, MLGemmOptions const * options);
+WEBNN_EXPORT MLOperand mlGraphBuilderInput(MLGraphBuilder graphBuilder, char const * name, MLOperandDescriptor const * desc);
+WEBNN_EXPORT MLOperand mlGraphBuilderLeakyRelu(MLGraphBuilder graphBuilder, MLOperand input, MLLeakyReluOptions const * options);
+WEBNN_EXPORT MLOperand mlGraphBuilderMatmul(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
+WEBNN_EXPORT MLOperand mlGraphBuilderMaxPool2d(MLGraphBuilder graphBuilder, MLOperand input, MLPool2dOptions const * options);
+WEBNN_EXPORT MLOperand mlGraphBuilderMul(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
+WEBNN_EXPORT MLOperand mlGraphBuilderRelu(MLGraphBuilder graphBuilder, MLOperand input);
+WEBNN_EXPORT MLOperand mlGraphBuilderReshape(MLGraphBuilder graphBuilder, MLOperand input, int32_t const * newShape, uint32_t newShapeCount);
+WEBNN_EXPORT MLOperand mlGraphBuilderSoftmax(MLGraphBuilder graphBuilder, MLOperand input);
+WEBNN_EXPORT MLOperand mlGraphBuilderSub(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
+WEBNN_EXPORT MLOperand mlGraphBuilderTranspose(MLGraphBuilder graphBuilder, MLOperand input, MLTransposeOptions const * options);
+WEBNN_EXPORT void mlGraphBuilderReference(MLGraphBuilder graphBuilder);
+WEBNN_EXPORT void mlGraphBuilderRelease(MLGraphBuilder graphBuilder);
 
 // Methods of NamedInputs
-WEBNN_EXPORT void webnnNamedInputsSet(WebnnNamedInputs namedInputs, char const * name, WebnnInput const * input);
-WEBNN_EXPORT void webnnNamedInputsReference(WebnnNamedInputs namedInputs);
-WEBNN_EXPORT void webnnNamedInputsRelease(WebnnNamedInputs namedInputs);
+WEBNN_EXPORT void mlNamedInputsSet(MLNamedInputs namedInputs, char const * name, MLInput const * input);
+WEBNN_EXPORT void mlNamedInputsReference(MLNamedInputs namedInputs);
+WEBNN_EXPORT void mlNamedInputsRelease(MLNamedInputs namedInputs);
 
 // Methods of NamedOperands
-WEBNN_EXPORT void webnnNamedOperandsSet(WebnnNamedOperands namedOperands, char const * name, WebnnOperand operand);
-WEBNN_EXPORT void webnnNamedOperandsReference(WebnnNamedOperands namedOperands);
-WEBNN_EXPORT void webnnNamedOperandsRelease(WebnnNamedOperands namedOperands);
+WEBNN_EXPORT void mlNamedOperandsSet(MLNamedOperands namedOperands, char const * name, MLOperand operand);
+WEBNN_EXPORT void mlNamedOperandsReference(MLNamedOperands namedOperands);
+WEBNN_EXPORT void mlNamedOperandsRelease(MLNamedOperands namedOperands);
 
 // Methods of NamedOutputs
-WEBNN_EXPORT void webnnNamedOutputsSet(WebnnNamedOutputs namedOutputs, char const * name, WebnnOutput const * output);
-WEBNN_EXPORT void webnnNamedOutputsReference(WebnnNamedOutputs namedOutputs);
-WEBNN_EXPORT void webnnNamedOutputsRelease(WebnnNamedOutputs namedOutputs);
+WEBNN_EXPORT void mlNamedOutputsSet(MLNamedOutputs namedOutputs, char const * name, MLOutput const * output);
+WEBNN_EXPORT void mlNamedOutputsReference(MLNamedOutputs namedOutputs);
+WEBNN_EXPORT void mlNamedOutputsRelease(MLNamedOutputs namedOutputs);
 
 // Methods of NamedResults
-WEBNN_EXPORT WebnnResult webnnNamedResultsGet(WebnnNamedResults namedResults, char const * name);
-WEBNN_EXPORT void webnnNamedResultsReference(WebnnNamedResults namedResults);
-WEBNN_EXPORT void webnnNamedResultsRelease(WebnnNamedResults namedResults);
-
-// Methods of NeuralNetworkContext
-WEBNN_EXPORT WebnnModelBuilder webnnNeuralNetworkContextCreateModelBuilder(WebnnNeuralNetworkContext neuralNetworkContext);
-WEBNN_EXPORT bool webnnNeuralNetworkContextPopErrorScope(WebnnNeuralNetworkContext neuralNetworkContext, WebnnErrorCallback callback, void * userdata);
-WEBNN_EXPORT void webnnNeuralNetworkContextPushErrorScope(WebnnNeuralNetworkContext neuralNetworkContext, WebnnErrorFilter filter);
-WEBNN_EXPORT void webnnNeuralNetworkContextSetUncapturedErrorCallback(WebnnNeuralNetworkContext neuralNetworkContext, WebnnErrorCallback callback, void * userdata);
-WEBNN_EXPORT void webnnNeuralNetworkContextReference(WebnnNeuralNetworkContext neuralNetworkContext);
-WEBNN_EXPORT void webnnNeuralNetworkContextRelease(WebnnNeuralNetworkContext neuralNetworkContext);
+WEBNN_EXPORT MLResult mlNamedResultsGet(MLNamedResults namedResults, char const * name);
+WEBNN_EXPORT void mlNamedResultsReference(MLNamedResults namedResults);
+WEBNN_EXPORT void mlNamedResultsRelease(MLNamedResults namedResults);
 
 // Methods of Operand
-WEBNN_EXPORT void webnnOperandReference(WebnnOperand operand);
-WEBNN_EXPORT void webnnOperandRelease(WebnnOperand operand);
+WEBNN_EXPORT void mlOperandReference(MLOperand operand);
+WEBNN_EXPORT void mlOperandRelease(MLOperand operand);
 
 // Methods of Result
-WEBNN_EXPORT const void* webnnResultBuffer(WebnnResult result);
-WEBNN_EXPORT uint32_t webnnResultBufferSize(WebnnResult result);
-WEBNN_EXPORT const int32_t* webnnResultDimensions(WebnnResult result);
-WEBNN_EXPORT uint32_t webnnResultDimensionsSize(WebnnResult result);
-WEBNN_EXPORT void webnnResultReference(WebnnResult result);
-WEBNN_EXPORT void webnnResultRelease(WebnnResult result);
+WEBNN_EXPORT const void* mlResultBuffer(MLResult result);
+WEBNN_EXPORT uint32_t mlResultBufferSize(MLResult result);
+WEBNN_EXPORT const int32_t* mlResultDimensions(MLResult result);
+WEBNN_EXPORT uint32_t mlResultDimensionsSize(MLResult result);
+WEBNN_EXPORT void mlResultReference(MLResult result);
+WEBNN_EXPORT void mlResultRelease(MLResult result);
 
 #endif  // !defined(WEBNN_SKIP_DECLARATIONS)
 
