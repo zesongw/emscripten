@@ -23,10 +23,10 @@
     },
     makeReferenceRelease: function(type) {
       var s = '';
-      s += 'webnn' + type + 'Reference: function(id) {\n';
+      s += 'ml' + type + 'Reference: function(id) {\n';
       s += '  WebNN.mgr' + type + '.reference(id);\n'
       s += '},\n';
-      s += 'webnn' + type + 'Release: function(id) {\n';
+      s += 'ml' + type + 'Release: function(id) {\n';
       s += '  WebNN.mgr' + type + '.release(id);\n'
       s += '},';
       return s;
@@ -72,7 +72,7 @@
 var LibraryWebNN = {
   $WebNN: {
     initManagers: function() {
-      if (this["mgrNeuralNetworkContext"]) return;
+      if (this["mgrContext"]) return;
 
       function makeManager() {
         return {
@@ -111,10 +111,9 @@ var LibraryWebNN = {
         };
       }
 
-      this["mgrNeuralNetworkContext"] = this["mgrNeuralNetworkContext"] || makeManager();
-      {{{ webnn.makeInitManager('Compilation') }}}
-      {{{ webnn.makeInitManager('Model') }}}
-      {{{ webnn.makeInitManager('ModelBuilder') }}}
+      this["mgrContext"] = this["mgrContext"] || makeManager();
+      {{{ webnn.makeInitManager('Graph') }}}
+      {{{ webnn.makeInitManager('GraphBuilder') }}}
       {{{ webnn.makeInitManager('NamedInputs') }}}
       {{{ webnn.makeInitManager('NamedOperands') }}}
       {{{ webnn.makeInitManager('NamedOutputs') }}}
@@ -128,13 +127,13 @@ var LibraryWebNN = {
       'same-upper',
       'same-lower',
     ],
-    CompileStatus: [
+    BuildGraphStatus: [
       'success',
       'error',
       'context-lost',
       'unknown',
     ],
-    ComputeStatus: [
+    ComputeGraphStatus: [
       'success',
       'error',
       'context-lost',
@@ -156,6 +155,7 @@ var LibraryWebNN = {
       'oihw',
       'hwio',
       'ohwi',
+      'ihwo',
     ],
     InputOperandLayout: [
       'nchw',
@@ -166,11 +166,13 @@ var LibraryWebNN = {
       'float16',
       'int32',
       'uint32',
+      'int8',
+      'uint8',
     ],
     PowerPreference: [
       'default',
-      'low_power',
       'high_performance',
+      'low_power',
     ],
 
     makeI32Array: function(count, arrayPtr) {
@@ -187,27 +189,21 @@ var LibraryWebNN = {
       return new Float32Array(HEAPU8.buffer, offset, byteSize / Float32Array.BYTES_PER_ELEMENT);
     },
 
-    makeCompilationOptions: function(ptr) {
-      return {
-        "powerPreference": this.PowerPreference[{{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnCompilationOptions.powerPreference) }}}],
-      };
-    },
-
     makeClampOptions: function(ptr) {
       return {
-        "minValue": this.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.WebnnClampOptions.minValue, '*') }}}),
-        "maxValue": this.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.WebnnClampOptions.maxValue, '*') }}}),
+        "minValue": this.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLClampOptions.minValue, '*') }}}),
+        "maxValue": this.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLClampOptions.maxValue, '*') }}}),
       };
     },
 
     makeOperandDescriptor: function(ptr) {
       return {
         "type": this.OperandType[
-            {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnOperandDescriptor.type) }}}
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLOperandDescriptor.type) }}}
         ],
         "dimensions": this.makeI32Array(
-            {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnOperandDescriptor.dimensionsCount) }}},
-            {{{ makeGetValue('ptr', C_STRUCTS.WebnnOperandDescriptor.dimensions, '*') }}}
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLOperandDescriptor.dimensionsCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLOperandDescriptor.dimensions, '*') }}}
         ),
       };
     },
@@ -215,57 +211,57 @@ var LibraryWebNN = {
     makeConv2dOptions: function(ptr) {
       return {
         "padding": this.AutoPad[
-            {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.autoPad) }}}
+            {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.autoPad) }}}
           ] === 'explicit' ? this.makeI32Array(
-            {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnConv2dOptions.paddingCount) }}},
-            {{{ makeGetValue('ptr', C_STRUCTS.WebnnConv2dOptions.padding, '*') }}}
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConv2dOptions.paddingCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.padding, '*') }}}
           ) : undefined,
         "strides": this.makeI32Array(
-          {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnConv2dOptions.stridesCount) }}},
-          {{{ makeGetValue('ptr', C_STRUCTS.WebnnConv2dOptions.strides, '*') }}}
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConv2dOptions.stridesCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.strides, '*') }}}
         ),
         "dilations": this.makeI32Array(
-          {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnConv2dOptions.dilationsCount) }}},
-          {{{ makeGetValue('ptr', C_STRUCTS.WebnnConv2dOptions.dilations, '*') }}}
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConv2dOptions.dilationsCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.dilations, '*') }}}
         ),
         "autoPad": this.AutoPad[
-          {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.autoPad) }}}
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.autoPad) }}}
         ],
-        "groups": {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.groups) }}},
+        "groups": {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.groups) }}},
         "inputLayout": this.InputOperandLayout[
-          {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.inputLayout) }}}
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.inputLayout) }}}
         ],
         "filterLayout": this.FilterOperandLayout[
-          {{{ webnn.makeGetI32('ptr', C_STRUCTS.WebnnConv2dOptions.filterLayout) }}}
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.filterLayout) }}}
         ]
       };
     },
 
     makeInput: function(ptr) {
       return {
-        "buffer": this.makeArrayBufferView(
-            {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}}, 
-            {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnInput.size) }}}
+        "data": this.makeArrayBufferView(
+            {{{ makeGetValue('ptr', C_STRUCTS.MLInput.buffer, '*') }}}, 
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLInput.size) }}}
         ),
-        "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}} === 0) ? undefined :
+        "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.MLInput.dimensions, '*') }}} === 0) ? undefined :
             this.makeI32Array(
-                {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnInput.dimensionsCount) }}},
-                {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}}
+                {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLInput.dimensionsCount) }}},
+                {{{ makeGetValue('ptr', C_STRUCTS.MLInput.dimensions, '*') }}}
         ),
       };
     },
 
     makeOutput: function(ptr) {
       return {
-        "buffer": ({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}} === 0) ? undefined :
+        "data": ({{{ makeGetValue('ptr', C_STRUCTS.MLOutput.buffer, '*') }}} === 0) ? undefined :
             this.makeArrayBufferView(
-                {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.buffer, '*') }}}, 
-                {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnInput.size) }}}
+                {{{ makeGetValue('ptr', C_STRUCTS.MLOutput.buffer, '*') }}}, 
+                {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLOutput.size) }}}
         ),
-        "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}} === 0) ? undefined :
+        "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.MLOutput.dimensions, '*') }}} === 0) ? undefined :
             this.makeI32Array(
-                {{{ webnn.makeGetU32('ptr', C_STRUCTS.WebnnInput.dimensionsCount) }}},
-                {{{ makeGetValue('ptr', C_STRUCTS.WebnnInput.dimensions, '*') }}}
+                {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLOutput.dimensionsCount) }}},
+                {{{ makeGetValue('ptr', C_STRUCTS.MLOutput.dimensions, '*') }}}
         ),
       };
     },
@@ -273,37 +269,36 @@ var LibraryWebNN = {
 
   // *Reference/*Release
 
-  {{{ webnn.makeReferenceRelease('Compilation') }}}
-  {{{ webnn.makeReferenceRelease('Model') }}}
-  {{{ webnn.makeReferenceRelease('ModelBuilder') }}}
+  {{{ webnn.makeReferenceRelease('Graph') }}}
+  {{{ webnn.makeReferenceRelease('GraphBuilder') }}}
   {{{ webnn.makeReferenceRelease('NamedInputs') }}}
   {{{ webnn.makeReferenceRelease('NamedOperands') }}}
   {{{ webnn.makeReferenceRelease('NamedOutputs') }}}
   {{{ webnn.makeReferenceRelease('NamedResults') }}}
-  {{{ webnn.makeReferenceRelease('NeuralNetworkContext') }}}
+  {{{ webnn.makeReferenceRelease('Context') }}}
   {{{ webnn.makeReferenceRelease('Operand') }}}
   {{{ webnn.makeReferenceRelease('Result') }}}
 
-  // Methods of ModelBuilder
+  // Methods of GraphBuilder
 
-  webnnModelBuilderInput: function(builderId, namePtr, descPtr) {
-    var builder = WebNN.mgrModelBuilder.get(builderId);
+  mlGraphBuilderInput: function(builderId, namePtr, descPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
     var name = UTF8ToString(namePtr);
     var desc = WebNN.makeOperandDescriptor(descPtr);
     var input = builder.input(name, desc);
     return WebNN.mgrOperand.create(input);
   },
 
-  webnnModelBuilderConstant: function(builderId, descPtr, valuePtr, size) {
-    var builder = WebNN.mgrModelBuilder.get(builderId);
+  mlGraphBuilderConstant: function(builderId, descPtr, valuePtr, size) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
     var desc = WebNN.makeOperandDescriptor(descPtr);
     var buffer = WebNN.makeArrayBufferView(valuePtr, size);
     var constant = builder.constant(desc, buffer);
     return WebNN.mgrOperand.create(constant);
   },
 
-  webnnModelBuilderConv2d: function(builderId, inputId, filterId, optionsPtr) {
-    var builder = WebNN.mgrModelBuilder.get(builderId);
+  mlGraphBuilderConv2d: function(builderId, inputId, filterId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
     var input = WebNN.mgrOperand.get(inputId);
     var filter = WebNN.mgrOperand.get(filterId);
     var options = WebNN.makeConv2dOptions(optionsPtr);
@@ -311,16 +306,16 @@ var LibraryWebNN = {
     return WebNN.mgrOperand.create(conv2d);
   },
 
-  webnnModelBuilderClamp: function(builderId, inputId, optionsPtr) {
-    var builder = WebNN.mgrModelBuilder.get(builderId);
+  mlGraphBuilderClamp: function(builderId, inputId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
     var input = WebNN.mgrOperand.get(inputId);
     var options = WebNN.makeClampOptions(optionsPtr);
     var clamp = builder.clamp(input, options);
     return WebNN.mgrOperand.create(clamp);
   },
 
-  webnnModelBuilderAdd: function(builderId, aId, bId) {
-    var builder = WebNN.mgrModelBuilder.get(builderId);
+  mlGraphBuilderAdd: function(builderId, aId, bId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
     var a = WebNN.mgrOperand.get(aId);
     var b = WebNN.mgrOperand.get(bId);
     var c = builder.add(a, b);
@@ -332,7 +327,7 @@ var LibraryWebNN = {
     return WebNN.mgrNamedInputs.create(inputs);
   },
 
-  webnnNamedInputsSet: function(namedInputsId, namePtr, inputPtr) {
+  mlNamedInputsSet: function(namedInputsId, namePtr, inputPtr) {
     var namedInputs = WebNN.mgrNamedInputs.get(namedInputsId);
     var name = UTF8ToString(namePtr);
     var input = WebNN.makeInput(inputPtr);
@@ -344,7 +339,7 @@ var LibraryWebNN = {
     return WebNN.mgrNamedOutputs.create(outputs);
   },
 
-  webnnNamedOutputsSet: function(namedOutputsId, namePtr, outputPtr) {
+  mlNamedOutputsSet: function(namedOutputsId, namePtr, outputPtr) {
     var namedOutputs = WebNN.mgrNamedOutputs.get(namedOutputsId);
     var name = UTF8ToString(namePtr);
     var output = WebNN.makeOutput(outputPtr);
@@ -356,75 +351,61 @@ var LibraryWebNN = {
     return WebNN.mgrNamedOperands.create(operands);
   },
 
-  webnnNamedOperandsSet: function(namedOperandsId, namePtr, operandId) {
+  mlNamedOperandsSet: function(namedOperandsId, namePtr, operandId) {
     var namedOperands = WebNN.mgrNamedOperands.get(namedOperandsId);
     var name = UTF8ToString(namePtr);
     var operand = WebNN.mgrOperand.get(operandId);
     namedOperands[name] = operand;
   },
 
-  webnnNeuralNetworkContextCreateModelBuilder: function(contextId) {
-    var context = WebNN.mgrNeuralNetworkContext.get(contextId);
-    var builder = context.createModelBuilder();
-    return WebNN.mgrModelBuilder.create(builder);
+  webnnCreateGraphBuilder: function(contextId) {
+    var context = WebNN.mgrContext.get(contextId);
+    var builder = new MLGraphBuilder(context);
+    return WebNN.mgrGraphBuilder.create(builder);
   },
 
-  webnnModelBuilderCreateModel: function(builderId, namedOperandsId) {
-    var builder = WebNN.mgrModelBuilder.get(builderId);
+  mlGraphBuilderBuild: function(builderId, namedOperandsId, callback, userdata) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
     var namedOperands = WebNN.mgrNamedOperands.get(namedOperandsId);
-    var model = builder.createModel(namedOperands);
-    return WebNN.mgrModel.create(model);
-  },
-
-  webnnModelCompile: function(modelId, callback, userdata, optionsPtr) {
-    var model = WebNN.mgrModel.get(modelId);
-    var options = optionsPtr === 0 ? undefined : WebNN.makeCompilationOptions(optionsPtr);
-    model.compile(options).then(function(compilation) {
-      var compilationId = WebNN.mgrCompilation.create(compilation);
-      {{{ makeDynCall('viiii', 'callback') }}}(0 /* WebnnCompileStatus_Success */, compilationId, 0, userdata);
+    builder.build(namedOperands).then(function(graph) {
+      var graphId = WebNN.mgrGraph.create(graph);
+      {{{ makeDynCall('viiii', 'callback') }}}(0 /* MLBuildGraphStatus_Success */, graphId, 0, userdata);
     }, function(error) {
       var messagePtr = allocateUTF8(error.message);
-      {{{ makeDynCall('viiii', 'callback') }}}(1 /* WebnnCompileStatus_Error */, 0, messagePtr, userdata);
+      {{{ makeDynCall('viiii', 'callback') }}}(1 /* MLBuildGraphStatus_Error */, 0, messagePtr, userdata);
     });
   },
 
-  webnnCompilationCompute: function(compilationId, inputsId, callback, userdata, outputsId) {
-    var compilation = WebNN.mgrCompilation.get(compilationId);
-    var inputs = WebNN.mgrNamedInputs.get(inputsId);
-    var outputs = outputsId === 0 ? undefined : WebNN.mgrNamedOutputs.get(outputsId);
-    compilation.compute(inputs, outputs).then(function(results) {
-      // TODO: implement results
-      {{{ makeDynCall('viiii', 'callback') }}}(0 /* WebnnComputeStatus_Success */, 0, 0, userdata);
-    }, function(error) {
-      var messagePtr = allocateUTF8(error.message);
-      {{{ makeDynCall('viiii', 'callback') }}}(1 /* WebnnComputeStatus_Error */, 0, messagePtr, userdata);
-    });
-  },
-
-  webnnModelCompileSync: function(modelId, optionsPtr) {
-    var model = WebNN.mgrModel.get(modelId);
-    var options = optionsPtr === 0 ? undefined : WebNN.makeCompilationOptions(optionsPtr);
+  mlGraphBuilderBuildSync: function(builderId, namedOperandsId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var namedOperands = WebNN.mgrNamedOperands.get(namedOperandsId);
     try {
-      var compilation = model.compileSync(options);
-      return WebNN.mgrCompilation.create(compilation);
+      var graph = builder.buildSync(namedOperands);
+      return WebNN.mgrGraph.create(graph);
     } catch (error) {
-      console.log('Model.compileSync failed: ' + error);
+      console.log('builder.buildSync failed: ' + error);
       return 0;  // nullptr
     }
   },
 
-  webnnCompilationComputeSync: function(compilationId, inputsId, outputsId) {
-    var compilation = WebNN.mgrCompilation.get(compilationId);
+  mlGraphCompute: function(graphId, inputsId, callback, userdata, outputsId) {
+    var graph = WebNN.mgrGraph.get(graphId);
     var inputs = WebNN.mgrNamedInputs.get(inputsId);
     var outputs = outputsId === 0 ? undefined : WebNN.mgrNamedOutputs.get(outputsId);
-    try {
-      var results = compilation.computeSync(inputs, outputs);
-      return WebNN.mgrNamedResults.create(results);
-    } catch (error) {
-      console.log('Model.computeSync failed: ' + error);
-      return 0;   // nullptr
-    }
-    
+    graph.compute(inputs, outputs).then(function(results) {
+      // TODO: implement results
+      {{{ makeDynCall('viiii', 'callback') }}}(0 /* MLComputeGraphStatus_Success */, 0, 0, userdata);
+    }, function(error) {
+      var messagePtr = allocateUTF8(error.message);
+      {{{ makeDynCall('viiii', 'callback') }}}(1 /* MLComputeGraphStatus_Error */, 0, messagePtr, userdata);
+    });
+  },
+
+  mlGraphComputeSync: function(graphId, inputsId, outputsId) {
+    var graph = WebNN.mgrGraph.get(graphId);
+    var inputs = WebNN.mgrNamedInputs.get(inputsId);
+    var outputs = WebNN.mgrNamedOutputs.get(outputsId);
+    return graph.computeSync(inputs, outputs);
   },
 
 };

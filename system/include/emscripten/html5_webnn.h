@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-WebnnNeuralNetworkContext emscripten_webnn_create_neural_network_context(void);
+MLContext emscripten_webnn_create_context(void);
 
 #ifdef __cplusplus
 } // ~extern "C"
