@@ -282,7 +282,7 @@ self.onmessage = function(e) {
           // FIXME(sbc): Figure out if this is still needed or useful.  Its not
           // clear to me how this check could ever fail.  In order to get into
           // this try/catch block at all we have already called bunch of
-          // functions on `Module`.. why is this one special?
+          // functions on Module.. why is this one special?
           if (typeof(Module['_emscripten_futex_wake']) !== "function") {
             err("Thread Initialisation failed.");
             throw ex;
