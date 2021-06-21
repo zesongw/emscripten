@@ -1547,7 +1547,8 @@
                 "scale",
                 "bias",
                 "axis",
-                "epsilon"
+                "epsilon",
+                "activation"
             ],
             "MLClampOptions": [
                 "minValue",
@@ -1566,7 +1567,9 @@
                 "autoPad",
                 "groups",
                 "inputLayout",
-                "filterLayout"
+                "filterLayout",
+                "bias",
+                "activation"
             ],
             "MLGemmOptions": [
                 "c",
