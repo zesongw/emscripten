@@ -1155,6 +1155,13 @@ class libwebgpu_cpp(MTLibrary):
   src_dir = ['system', 'lib', 'webgpu']
   src_files = ['webgpu_cpp.cpp']
 
+class libwebnn_cpp(MTLibrary):
+  name = 'libwebnn_cpp'
+
+  cflags = ['-std=c++11', '-O2']
+  src_dir = ['system', 'lib', 'webnn']
+  src_files = ['webnn_cpp.cpp']
+
 
 class libembind(Library):
   name = 'libembind'
@@ -1576,6 +1583,9 @@ def calculate(input_files, forced):
 
     if settings.USE_WEBGPU:
       add_library('libwebgpu_cpp')
+
+    if settings.USE_WEBNN:
+      add_library('libwebnn_cpp')
 
   # When LINKABLE is set the entire link command line is wrapped in --whole-archive by
   # building.link_ldd.  And since --whole-archive/--no-whole-archive processing does not nest we

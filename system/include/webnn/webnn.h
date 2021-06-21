@@ -94,6 +94,12 @@ typedef enum MLFilterOperandLayout {
     MLFilterOperandLayout_Force32 = 0x7FFFFFFF
 } MLFilterOperandLayout;
 
+typedef enum MLFusedActivation {
+    MLFusedActivation_None = 0x00000000,
+    MLFusedActivation_Relu = 0x00000001,
+    MLFusedActivation_Force32 = 0x7FFFFFFF
+} MLFusedActivation;
+
 typedef enum MLInputOperandLayout {
     MLInputOperandLayout_Nchw = 0x00000000,
     MLInputOperandLayout_Nhwc = 0x00000001,
@@ -123,6 +129,7 @@ typedef struct MLBatchNormOptions {
     MLOperand bias;
     uint32_t axis;
     float epsilon;
+    MLFusedActivation activation;
 } MLBatchNormOptions;
 
 typedef struct MLClampOptions {
@@ -145,6 +152,8 @@ typedef struct MLConv2dOptions {
     int32_t groups;
     MLInputOperandLayout inputLayout;
     MLFilterOperandLayout filterLayout;
+    MLOperand bias;
+    MLFusedActivation activation;
 } MLConv2dOptions;
 
 typedef struct MLGemmOptions {
