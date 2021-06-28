@@ -289,7 +289,7 @@ var LibraryWebNN = {
         "autoPad": this.AutoPad[
           {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLPool2dOptions.autoPad) }}}
         ],
-        "inputLayout": this.InputOperandLayout[
+        "layout": this.InputOperandLayout[
           {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLPool2dOptions.layout) }}}
         ],
       };
