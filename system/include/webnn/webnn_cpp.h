@@ -12,18 +12,17 @@ namespace ml {
         SameLower = 0x00000002,
     };
 
-    enum class BuildGraphStatus : uint32_t {
+    enum class ComputeGraphStatus : uint32_t {
         Success = 0x00000000,
         Error = 0x00000001,
         ContextLost = 0x00000002,
         Unknown = 0x00000003,
     };
 
-    enum class ComputeGraphStatus : uint32_t {
-        Success = 0x00000000,
-        Error = 0x00000001,
-        ContextLost = 0x00000002,
-        Unknown = 0x00000003,
+    enum class DevicePreference : uint32_t {
+        Default = 0x00000000,
+        Gpu = 0x00000001,
+        Cpu = 0x00000002,
     };
 
     enum class ErrorFilter : uint32_t {
@@ -47,14 +46,14 @@ namespace ml {
         Ihwo = 0x00000003,
     };
 
-    enum class FusedActivation : uint32_t {
-        None = 0x00000000,
-        Relu = 0x00000001,
-    };
-
     enum class InputOperandLayout : uint32_t {
         Nchw = 0x00000000,
         Nhwc = 0x00000001,
+    };
+
+    enum class InterpolationMode : uint32_t {
+        NearestNeighbor = 0x00000000,
+        Linear = 0x00000001,
     };
 
     enum class OperandType : uint32_t {
@@ -64,6 +63,13 @@ namespace ml {
         Uint32 = 0x00000003,
         Int8 = 0x00000004,
         Uint8 = 0x00000005,
+    };
+
+    enum class PaddingMode : uint32_t {
+        Constant = 0x00000000,
+        Edge = 0x00000001,
+        Reflection = 0x00000002,
+        Symmetric = 0x00000003,
     };
 
     enum class PowerPreference : uint32_t {
@@ -76,8 +82,6 @@ namespace ml {
 
 
     using Proc = WebnnProc;
-    using BuildGraphCallback = MLBuildGraphCallback;
-    using ComputeGraphCallback = MLComputeGraphCallback;
     using ErrorCallback = MLErrorCallback;
 
     class Context;
@@ -86,21 +90,24 @@ namespace ml {
     class NamedInputs;
     class NamedOperands;
     class NamedOutputs;
-    class NamedResults;
     class Operand;
-    class Result;
+    class Operator;
 
+    struct ArrayBufferView;
     struct BatchNormOptions;
     struct ClampOptions;
     struct ContextOptions;
     struct Conv2dOptions;
     struct GemmOptions;
-    struct Input;
+    struct InstanceNormOptions;
     struct LeakyReluOptions;
     struct OperandDescriptor;
-    struct Output;
+    struct PadOptions;
     struct Pool2dOptions;
+    struct ReduceMeanOptions;
+    struct ResampleOptions;
     struct TransposeOptions;
+    struct Input;
 
     template<typename Derived, typename CType>
     class ObjectBase {
@@ -199,8 +206,7 @@ namespace ml {
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
-        void Compute(NamedInputs const& inputs, ComputeGraphCallback callback, void * userdata, NamedOutputs const& outputs) const;
-        ComputeGraphStatus ComputeSync(NamedInputs const& inputs, NamedOutputs const& outputs) const;
+        ComputeGraphStatus Compute(NamedInputs const& inputs, NamedOutputs const& outputs) const;
 
       private:
         friend ObjectBase<Graph, MLGraph>;
@@ -216,22 +222,28 @@ namespace ml {
         Operand Add(Operand const& a, Operand const& b) const;
         Operand AveragePool2d(Operand const& input, Pool2dOptions const * options = nullptr) const;
         Operand BatchNorm(Operand const& input, Operand const& mean, Operand const& variance, BatchNormOptions const * options = nullptr) const;
-        void Build(NamedOperands const& namedOperands, BuildGraphCallback callback, void * userdata) const;
-        Graph BuildSync(NamedOperands const& namedOperands) const;
+        Graph Build(NamedOperands const& namedOperands) const;
         Operand Clamp(Operand const& input, ClampOptions const * options = nullptr) const;
         Operand Concat(uint32_t inputsCount, Operand const * inputs, uint32_t axis) const;
-        Operand Constant(OperandDescriptor const * desc, void const * value, size_t size) const;
+        Operand Constant(OperandDescriptor const * desc, ArrayBufferView const * value) const;
         Operand Conv2d(Operand const& input, Operand const& filter, Conv2dOptions const * options = nullptr) const;
+        Operand Div(Operand const& a, Operand const& b) const;
         Operand Gemm(Operand const& a, Operand const& b, GemmOptions const * options = nullptr) const;
         Operand Input(char const * name, OperandDescriptor const * desc) const;
+        Operand InstanceNorm(Operand const& input, InstanceNormOptions const * options = nullptr) const;
         Operand LeakyRelu(Operand const& input, LeakyReluOptions const * options = nullptr) const;
         Operand Matmul(Operand const& a, Operand const& b) const;
         Operand MaxPool2d(Operand const& input, Pool2dOptions const * options = nullptr) const;
         Operand Mul(Operand const& a, Operand const& b) const;
+        Operand Pad(Operand const& input, Operand const& padding, PadOptions const * options = nullptr) const;
+        Operand ReduceMean(Operand const& input, ReduceMeanOptions const * options = nullptr) const;
         Operand Relu(Operand const& input) const;
+        Operand Resample(Operand const& input, ResampleOptions const * options = nullptr) const;
         Operand Reshape(Operand const& input, int32_t const * newShape, uint32_t newShapeCount) const;
+        Operand Sigmoid(Operand const& input) const;
         Operand Softmax(Operand const& input) const;
         Operand Sub(Operand const& a, Operand const& b) const;
+        Operand Tanh(Operand const& input) const;
         Operand Transpose(Operand const& input, TransposeOptions const * options = nullptr) const;
 
       private:
@@ -271,25 +283,12 @@ namespace ml {
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
-        void Set(char const * name, Output const * output) const;
+        void Set(char const * name, ArrayBufferView const * resource) const;
 
       private:
         friend ObjectBase<NamedOutputs, MLNamedOutputs>;
         static void WebnnReference(MLNamedOutputs handle);
         static void WebnnRelease(MLNamedOutputs handle);
-    };
-
-    class NamedResults : public ObjectBase<NamedResults, MLNamedResults> {
-      public:
-        using ObjectBase::ObjectBase;
-        using ObjectBase::operator=;
-
-        Result Get(char const * name) const;
-
-      private:
-        friend ObjectBase<NamedResults, MLNamedResults>;
-        static void WebnnReference(MLNamedResults handle);
-        static void WebnnRelease(MLNamedResults handle);
     };
 
     class Operand : public ObjectBase<Operand, MLOperand> {
@@ -304,20 +303,16 @@ namespace ml {
         static void WebnnRelease(MLOperand handle);
     };
 
-    class Result : public ObjectBase<Result, MLResult> {
+    class Operator : public ObjectBase<Operator, MLOperator> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
-        const void* Buffer() const;
-        uint32_t BufferSize() const;
-        const int32_t* Dimensions() const;
-        uint32_t DimensionsSize() const;
 
       private:
-        friend ObjectBase<Result, MLResult>;
-        static void WebnnReference(MLResult handle);
-        static void WebnnRelease(MLResult handle);
+        friend ObjectBase<Operator, MLOperator>;
+        static void WebnnReference(MLOperator handle);
+        static void WebnnRelease(MLOperator handle);
     };
 
 
@@ -326,12 +321,17 @@ namespace ml {
         // SType sType = SType::Invalid;
     };
 
+    struct ArrayBufferView {
+        void * buffer;
+        size_t byteLength;
+        size_t byteOffset = 0;
+    };
+
     struct BatchNormOptions {
         Operand scale;
         Operand bias;
         uint32_t axis = 1;
         float epsilon = 1e-05;
-        FusedActivation activation = FusedActivation::None;
     };
 
     struct ClampOptions {
@@ -340,6 +340,7 @@ namespace ml {
     };
 
     struct ContextOptions {
+        DevicePreference devicePreference = DevicePreference::Default;
         PowerPreference powerPreference = PowerPreference::Default;
     };
 
@@ -354,8 +355,6 @@ namespace ml {
         int32_t groups = 1;
         InputOperandLayout inputLayout = InputOperandLayout::Nchw;
         FilterOperandLayout filterLayout = FilterOperandLayout::Oihw;
-        Operand bias;
-        FusedActivation activation = FusedActivation::None;
     };
 
     struct GemmOptions {
@@ -366,11 +365,11 @@ namespace ml {
         bool bTranspose = false;
     };
 
-    struct Input {
-        void const * buffer;
-        size_t size;
-        int32_t const * dimensions = nullptr;
-        uint32_t dimensionsCount = 0;
+    struct InstanceNormOptions {
+        Operand scale;
+        Operand bias;
+        float epsilon = 1e-05;
+        InputOperandLayout layout = InputOperandLayout::Nchw;
     };
 
     struct LeakyReluOptions {
@@ -383,11 +382,9 @@ namespace ml {
         uint32_t dimensionsCount = 0;
     };
 
-    struct Output {
-        void * buffer = nullptr;
-        size_t size;
-        int32_t const * dimensions = nullptr;
-        uint32_t dimensionsCount = 0;
+    struct PadOptions {
+        PaddingMode mode = PaddingMode::Constant;
+        float value = 0;
     };
 
     struct Pool2dOptions {
@@ -403,9 +400,29 @@ namespace ml {
         InputOperandLayout layout = InputOperandLayout::Nchw;
     };
 
+    struct ReduceMeanOptions {
+        uint32_t axesCount = 0;
+        int32_t const * axes = nullptr;
+        bool keepDimensions = false;
+    };
+
+    struct ResampleOptions {
+        InterpolationMode mode = InterpolationMode::NearestNeighbor;
+        uint32_t scalesCount = 0;
+        float const * scales = nullptr;
+        uint32_t sizesCount = 0;
+        int32_t const * sizes = nullptr;
+    };
+
     struct TransposeOptions {
         uint32_t permutationCount = 0;
         int32_t const * permutation = nullptr;
+    };
+
+    struct Input {
+        ArrayBufferView resource;
+        int32_t const * dimensions = nullptr;
+        uint32_t dimensionsCount = 0;
     };
 
 

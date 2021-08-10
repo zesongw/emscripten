@@ -115,11 +115,10 @@ var LibraryWebNN = {
       {{{ webnn.makeInitManager('Graph') }}}
       {{{ webnn.makeInitManager('GraphBuilder') }}}
       {{{ webnn.makeInitManager('NamedInputs') }}}
-      {{{ webnn.makeInitManager('NamedOperands') }}}
       {{{ webnn.makeInitManager('NamedOutputs') }}}
-      {{{ webnn.makeInitManager('NamedResults') }}}
+      {{{ webnn.makeInitManager('NamedOperands') }}}
       {{{ webnn.makeInitManager('Operand') }}}
-      {{{ webnn.makeInitManager('Result') }}}
+      {{{ webnn.makeInitManager('Operator') }}}
     },
 
     AutoPad: [
@@ -127,17 +126,16 @@ var LibraryWebNN = {
       'same-upper',
       'same-lower',
     ],
-    BuildGraphStatus: [
-      'success',
-      'error',
-      'context-lost',
-      'unknown',
-    ],
     ComputeGraphStatus: [
       'success',
       'error',
       'context-lost',
       'unknown',
+    ],
+    DevicePreference: [
+      'default',
+      'gpu',
+      'cpu',
     ],
     ErrorFilter: [
       'none',
@@ -157,13 +155,13 @@ var LibraryWebNN = {
       'ohwi',
       'ihwo',
     ],
-    FusedActivation: [
-      'none',
-      'relu',
-    ],
     InputOperandLayout: [
       'nchw',
       'nhwc',
+    ],
+    InterpolationMode: [
+      'nearest-neighbor',
+      'linear',
     ],
     OperandType: [
       'float32',
@@ -172,6 +170,12 @@ var LibraryWebNN = {
       'uint32',
       'int8',
       'uint8',
+    ],
+    PaddingMode: [
+      'constant',
+      'edge',
+      'reflection',
+      'symmetric',
     ],
     PowerPreference: [
       'default',
@@ -190,7 +194,21 @@ var LibraryWebNN = {
       return array;
     },
 
-    makeArrayBufferView: function(offset, byteSize, type = "float32") {
+    makeF32Array: function(count, arrayPtr) {
+      if (count === 0 || arrayPtr === 0) {
+        return undefined;
+      }
+      var array = [];
+      for (var i = 0; i < count; ++i, arrayPtr += 4) {
+        array.push({{{ webnn.makeGetF32('arrayPtr', 0) }}});
+      }
+      return array;
+    },
+
+    makeArrayBufferView: function(ptr, type = "float32") {
+      const offset = {{{ makeGetValue('ptr', C_STRUCTS.MLArrayBufferView.buffer, '*') }}} + 
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLArrayBufferView.byteOffset) }}};
+      const byteSize = {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLArrayBufferView.byteLength) }}};
       assert(type === "float32");
       // TODO: support other array buffer view types.
       return new Float32Array(HEAPU8.buffer, offset, byteSize / Float32Array.BYTES_PER_ELEMENT);
@@ -209,7 +227,6 @@ var LibraryWebNN = {
         "bias": this.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLBatchNormOptions.bias, '*') }}}),
         "axis": {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLBatchNormOptions.axis) }}},
         "epsilon": {{{ webnn.makeGetF32('ptr', C_STRUCTS.MLBatchNormOptions.epsilon) }}},
-        "activation": this.FusedActivation[ {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLBatchNormOptions.activation) }}}],
       };
     },
 
@@ -261,8 +278,6 @@ var LibraryWebNN = {
         "filterLayout": this.FilterOperandLayout[
           {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.filterLayout) }}}
         ],
-        "bias": this.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.bias, '*') }}}),
-        "activation": this.FusedActivation[ {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.activation) }}}],
       };
     },
 
@@ -296,63 +311,64 @@ var LibraryWebNN = {
     },
 
     makeInput: function(ptr) {
+      if ({{{ makeGetValue('ptr', C_STRUCTS.MLInput.dimensions, '*') }}} === 0) {
+        return this.makeArrayBufferView(ptr + {{{ C_STRUCTS.MLInput.resource }}});
+      } else {
+        return {
+          "resource": this.makeArrayBufferView(ptr + {{{ C_STRUCTS.MLInput.resource }}}),
+          "dimensions": this.makeI32Array(
+              {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLInput.dimensionsCount) }}},
+              {{{ makeGetValue('ptr', C_STRUCTS.MLInput.dimensions, '*') }}}
+          ),
+        };
+      }
+    },
+
+    makeTransposeOptions: function(ptr) {
       return {
-        "data": this.makeArrayBufferView(
-            {{{ makeGetValue('ptr', C_STRUCTS.MLInput.buffer, '*') }}}, 
-            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLInput.size) }}}
+        "permutation": this.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLTransposeOptions.permutationCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLTransposeOptions.permutation, '*') }}}
+        )
+      };
+    },
+
+    makeResampleOptions: function(ptr) {
+      return {
+        "mode": this.InterpolationMode[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLResampleOptions.mode) }}}
+        ],
+        "scales": this.makeF32Array(
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResampleOptions.scalesCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLResampleOptions.scales, '*') }}}
         ),
-        "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.MLInput.dimensions, '*') }}} === 0) ? undefined :
-            this.makeI32Array(
-                {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLInput.dimensionsCount) }}},
-                {{{ makeGetValue('ptr', C_STRUCTS.MLInput.dimensions, '*') }}}
+        "sizes": this.makeI32Array(
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResampleOptions.sizesCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLResampleOptions.sizes, '*') }}}
         ),
       };
     },
 
-    makeOutput: function(ptr) {
-      return {
-        "data": ({{{ makeGetValue('ptr', C_STRUCTS.MLOutput.buffer, '*') }}} === 0) ? undefined :
-            this.makeArrayBufferView(
-                {{{ makeGetValue('ptr', C_STRUCTS.MLOutput.buffer, '*') }}}, 
-                {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLOutput.size) }}}
-        ),
-        "dimensions":({{{ makeGetValue('ptr', C_STRUCTS.MLOutput.dimensions, '*') }}} === 0) ? undefined :
-            this.makeI32Array(
-                {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLOutput.dimensionsCount) }}},
-                {{{ makeGetValue('ptr', C_STRUCTS.MLOutput.dimensions, '*') }}}
-        ),
-      };
-    },
   },
 
   // *Reference/*Release
 
+  {{{ webnn.makeReferenceRelease('Context') }}}
   {{{ webnn.makeReferenceRelease('Graph') }}}
   {{{ webnn.makeReferenceRelease('GraphBuilder') }}}
   {{{ webnn.makeReferenceRelease('NamedInputs') }}}
   {{{ webnn.makeReferenceRelease('NamedOperands') }}}
   {{{ webnn.makeReferenceRelease('NamedOutputs') }}}
-  {{{ webnn.makeReferenceRelease('NamedResults') }}}
-  {{{ webnn.makeReferenceRelease('Context') }}}
   {{{ webnn.makeReferenceRelease('Operand') }}}
-  {{{ webnn.makeReferenceRelease('Result') }}}
+  {{{ webnn.makeReferenceRelease('Operator') }}}
 
   // Methods of GraphBuilder
-
-  mlGraphBuilderInput: function(builderId, namePtr, descPtr) {
+  mlGraphBuilderAdd: function(builderId, aId, bId) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var name = UTF8ToString(namePtr);
-    var desc = WebNN.makeOperandDescriptor(descPtr);
-    var input = builder.input(name, desc);
-    return WebNN.mgrOperand.create(input);
-  },
-
-  mlGraphBuilderConstant: function(builderId, descPtr, valuePtr, size) {
-    var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var desc = WebNN.makeOperandDescriptor(descPtr);
-    var buffer = WebNN.makeArrayBufferView(valuePtr, size);
-    var constant = builder.constant(desc, buffer);
-    return WebNN.mgrOperand.create(constant);
+    var a = WebNN.mgrOperand.get(aId);
+    var b = WebNN.mgrOperand.get(bId);
+    var c = builder.add(a, b);
+    return WebNN.mgrOperand.create(c);
   },
 
   mlGraphBuilderAveragePool2d: function(builderId, inputId, optionsPtr) {
@@ -360,14 +376,6 @@ var LibraryWebNN = {
     var input = WebNN.mgrOperand.get(inputId);
     var options = WebNN.makePool2dOptions(optionsPtr);
     var pool2d = builder.averagePool2d(input, options);
-    return WebNN.mgrOperand.create(pool2d);
-  },
-
-  mlGraphBuilderMaxPool2d: function(builderId, inputId, optionsPtr) {
-    var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var input = WebNN.mgrOperand.get(inputId);
-    var options = WebNN.makePool2dOptions(optionsPtr);
-    var pool2d = builder.maxPool2d(input, options);
     return WebNN.mgrOperand.create(pool2d);
   },
 
@@ -381,6 +389,26 @@ var LibraryWebNN = {
     return WebNN.mgrOperand.create(output);
   },
 
+  mlGraphBuilderBuild: function(builderId, namedOperandsId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var namedOperands = WebNN.mgrNamedOperands.get(namedOperandsId);
+    try {
+      var graph = builder.build(namedOperands);
+      return WebNN.mgrGraph.create(graph);
+    } catch (error) {
+      console.log('builder.build failed: ' + error);
+      return 0;  // nullptr
+    }
+  },
+
+  mlGraphBuilderClamp: function(builderId, inputId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var options = WebNN.makeClampOptions(optionsPtr);
+    var clamp = builder.clamp(input, options);
+    return WebNN.mgrOperand.create(clamp);
+  },
+
   mlGraphBuilderConcat: function(builderId, inputsCount, inputsPtr, axis) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var inputIds = WebNN.makeI32Array(inputsCount, inputsPtr);
@@ -392,36 +420,12 @@ var LibraryWebNN = {
     return WebNN.mgrOperand.create(output);
   },
 
-  mlGraphBuilderGemm: function(builderId, aId, bId, optionsPtr) {
+  mlGraphBuilderConstant: function(builderId, descPtr, arrayBufferViewPtr) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var a = WebNN.mgrOperand.get(aId);
-    var b = WebNN.mgrOperand.get(bId);
-    var options = WebNN.makeGemmOptions(optionsPtr);
-    var output = builder.gemm(a, b, options);
-    return WebNN.mgrOperand.create(output);
-  },
-
-  mlGraphBuilderReshape: function(builderId, inputId, newShapePtr, newShapeCount) {
-    var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var input = WebNN.mgrOperand.get(inputId);
-    var newShape = WebNN.makeI32Array(newShapeCount, newShapePtr);
-    var output = builder.reshape(input, newShape);
-    return WebNN.mgrOperand.create(output);
-  },
-
-  mlGraphBuilderMatmul: function(builderId, aId, bId) {
-    var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var a = WebNN.mgrOperand.get(aId);
-    var b = WebNN.mgrOperand.get(bId);
-    var c = builder.matmul(a, b);
-    return WebNN.mgrOperand.create(c);
-  },
-
-  mlGraphBuilderRelu: function(builderId, inputId) {
-    var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var input = WebNN.mgrOperand.get(inputId);
-    var output = builder.relu(input);
-    return WebNN.mgrOperand.create(output);
+    var desc = WebNN.makeOperandDescriptor(descPtr);
+    var buffer = WebNN.makeArrayBufferView(arrayBufferViewPtr, desc.type);
+    var constant = builder.constant(desc, buffer);
+    return WebNN.mgrOperand.create(constant);
   },
 
   mlGraphBuilderConv2d: function(builderId, inputId, filterId, optionsPtr) {
@@ -433,20 +437,99 @@ var LibraryWebNN = {
     return WebNN.mgrOperand.create(conv2d);
   },
 
-  mlGraphBuilderClamp: function(builderId, inputId, optionsPtr) {
-    var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var input = WebNN.mgrOperand.get(inputId);
-    var options = WebNN.makeClampOptions(optionsPtr);
-    var clamp = builder.clamp(input, options);
-    return WebNN.mgrOperand.create(clamp);
-  },
-
-  mlGraphBuilderAdd: function(builderId, aId, bId) {
+  mlGraphBuilderDiv: function(builderId, aId, bId) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var a = WebNN.mgrOperand.get(aId);
     var b = WebNN.mgrOperand.get(bId);
-    var c = builder.add(a, b);
+    var c = builder.div(a, b);
     return WebNN.mgrOperand.create(c);
+  },
+
+  mlGraphBuilderGemm: function(builderId, aId, bId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var a = WebNN.mgrOperand.get(aId);
+    var b = WebNN.mgrOperand.get(bId);
+    var options = WebNN.makeGemmOptions(optionsPtr);
+    var output = builder.gemm(a, b, options);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderInput: function(builderId, namePtr, descPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var name = UTF8ToString(namePtr);
+    var desc = WebNN.makeOperandDescriptor(descPtr);
+    var input = builder.input(name, desc);
+    return WebNN.mgrOperand.create(input);
+  },
+
+  mlGraphBuilderMatmul: function(builderId, aId, bId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var a = WebNN.mgrOperand.get(aId);
+    var b = WebNN.mgrOperand.get(bId);
+    var c = builder.matmul(a, b);
+    return WebNN.mgrOperand.create(c);
+  },
+
+  mlGraphBuilderMaxPool2d: function(builderId, inputId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var options = WebNN.makePool2dOptions(optionsPtr);
+    var pool2d = builder.maxPool2d(input, options);
+    return WebNN.mgrOperand.create(pool2d);
+  },
+
+  mlGraphBuilderMul: function(builderId, aId, bId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var a = WebNN.mgrOperand.get(aId);
+    var b = WebNN.mgrOperand.get(bId);
+    var c = builder.mul(a, b);
+    return WebNN.mgrOperand.create(c);
+  },
+
+  mlGraphBuilderRelu: function(builderId, inputId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var output = builder.relu(input);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderResample: function(builderId, inputId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var options = WebNN.makeResampleOptions(optionsPtr);
+    var output = builder.resample(input, options);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderReshape: function(builderId, inputId, newShapePtr, newShapeCount) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var newShape = WebNN.makeI32Array(newShapeCount, newShapePtr);
+    var output = builder.reshape(input, newShape);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderSoftmax: function(builderId, inputId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var output = builder.softmax(input);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderSub: function(builderId, aId, bId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var a = WebNN.mgrOperand.get(aId);
+    var b = WebNN.mgrOperand.get(bId);
+    var c = builder.sub(a, b);
+    return WebNN.mgrOperand.create(c);
+  },
+
+  mlGraphBuilderTranspose: function(builderId, inputId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var options = WebNN.makeTransposeOptions(optionsPtr);
+    var output = builder.transpose(input, options);
+    return WebNN.mgrOperand.create(output);
   },
 
   webnnCreateNamedInputs: function() {
@@ -466,10 +549,10 @@ var LibraryWebNN = {
     return WebNN.mgrNamedOutputs.create(outputs);
   },
 
-  mlNamedOutputsSet: function(namedOutputsId, namePtr, outputPtr) {
+  mlNamedOutputsSet: function(namedOutputsId, namePtr, arrayBufferViewPtr) {
     var namedOutputs = WebNN.mgrNamedOutputs.get(namedOutputsId);
     var name = UTF8ToString(namePtr);
-    var output = WebNN.makeOutput(outputPtr);
+    var output = WebNN.makeArrayBufferView(arrayBufferViewPtr);
     namedOutputs[name] = output;
   },
 
@@ -491,48 +574,12 @@ var LibraryWebNN = {
     return WebNN.mgrGraphBuilder.create(builder);
   },
 
-  mlGraphBuilderBuild: function(builderId, namedOperandsId, callback, userdata) {
-    var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var namedOperands = WebNN.mgrNamedOperands.get(namedOperandsId);
-    builder.build(namedOperands).then(function(graph) {
-      var graphId = WebNN.mgrGraph.create(graph);
-      {{{ makeDynCall('viiii', 'callback') }}}(0 /* MLBuildGraphStatus_Success */, graphId, 0, userdata);
-    }, function(error) {
-      var messagePtr = allocateUTF8(error.message);
-      {{{ makeDynCall('viiii', 'callback') }}}(1 /* MLBuildGraphStatus_Error */, 0, messagePtr, userdata);
-    });
-  },
-
-  mlGraphBuilderBuildSync: function(builderId, namedOperandsId) {
-    var builder = WebNN.mgrGraphBuilder.get(builderId);
-    var namedOperands = WebNN.mgrNamedOperands.get(namedOperandsId);
-    try {
-      var graph = builder.buildSync(namedOperands);
-      return WebNN.mgrGraph.create(graph);
-    } catch (error) {
-      console.log('builder.buildSync failed: ' + error);
-      return 0;  // nullptr
-    }
-  },
-
-  mlGraphCompute: function(graphId, inputsId, callback, userdata, outputsId) {
-    var graph = WebNN.mgrGraph.get(graphId);
-    var inputs = WebNN.mgrNamedInputs.get(inputsId);
-    var outputs = outputsId === 0 ? undefined : WebNN.mgrNamedOutputs.get(outputsId);
-    graph.compute(inputs, outputs).then(function(results) {
-      // TODO: implement results
-      {{{ makeDynCall('viiii', 'callback') }}}(0 /* MLComputeGraphStatus_Success */, 0, 0, userdata);
-    }, function(error) {
-      var messagePtr = allocateUTF8(error.message);
-      {{{ makeDynCall('viiii', 'callback') }}}(1 /* MLComputeGraphStatus_Error */, 0, messagePtr, userdata);
-    });
-  },
-
-  mlGraphComputeSync: function(graphId, inputsId, outputsId) {
+  
+  mlGraphCompute: function(graphId, inputsId, outputsId) {
     var graph = WebNN.mgrGraph.get(graphId);
     var inputs = WebNN.mgrNamedInputs.get(inputsId);
     var outputs = WebNN.mgrNamedOutputs.get(outputsId);
-    return graph.computeSync(inputs, outputs);
+    return graph.compute(inputs, outputs);
   },
 
 };
