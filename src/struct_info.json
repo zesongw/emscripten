@@ -1376,18 +1376,23 @@
         "file": "webnn/webnn.h",
         "defines": [],
         "structs": {
+            "MLArrayBufferView": [
+                "buffer",
+                "byteLength",
+                "byteOffset"
+            ],
             "MLBatchNormOptions": [
                 "scale",
                 "bias",
                 "axis",
-                "epsilon",
-                "activation"
+                "epsilon"
             ],
             "MLClampOptions": [
                 "minValue",
                 "maxValue"
             ],
             "MLContextOptions": [
+                "devicePreference",
                 "powerPreference"
             ],
             "MLConv2dOptions": [
@@ -1400,9 +1405,7 @@
                 "autoPad",
                 "groups",
                 "inputLayout",
-                "filterLayout",
-                "bias",
-                "activation"
+                "filterLayout"
             ],
             "MLGemmOptions": [
                 "c",
@@ -1411,11 +1414,11 @@
                 "aTranspose",
                 "bTranspose"
             ],
-            "MLInput": [
-                "buffer",
-                "size",
-                "dimensions",
-                "dimensionsCount"
+            "MLInstanceNormOptions": [
+                "scale",
+                "bias",
+                "epsilon",
+                "layout"
             ],
             "MLLeakyReluOptions": [
                 "alpha"
@@ -1425,11 +1428,9 @@
                 "dimensions",
                 "dimensionsCount"
             ],
-            "MLOutput": [
-                "buffer",
-                "size",
-                "dimensions",
-                "dimensionsCount"
+            "MLPadOptions": [
+                "mode",
+                "value"
             ],
             "MLPool2dOptions": [
                 "windowDimensionsCount",
@@ -1443,9 +1444,26 @@
                 "autoPad",
                 "layout"
             ],
+            "MLReduceMeanOptions": [
+                "axesCount",
+                "axes",
+                "keepDimensions"
+            ],
+            "MLResampleOptions": [
+                "mode",
+                "scalesCount",
+                "scales",
+                "sizesCount",
+                "sizes"
+            ],
             "MLTransposeOptions": [
                 "permutationCount",
                 "permutation"
+            ],
+            "MLInput": [
+                "resource",
+                "dimensions",
+                "dimensionsCount"
             ]
         }
     },

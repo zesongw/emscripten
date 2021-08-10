@@ -11,16 +11,6 @@ namespace ml {
     static_assert(static_cast<uint32_t>(AutoPad::SameUpper) == MLAutoPad_SameUpper, "value mismatch for AutoPad::SameUpper");
     static_assert(static_cast<uint32_t>(AutoPad::SameLower) == MLAutoPad_SameLower, "value mismatch for AutoPad::SameLower");
 
-    // BuildGraphStatus
-
-    static_assert(sizeof(BuildGraphStatus) == sizeof(MLBuildGraphStatus), "sizeof mismatch for BuildGraphStatus");
-    static_assert(alignof(BuildGraphStatus) == alignof(MLBuildGraphStatus), "alignof mismatch for BuildGraphStatus");
-
-    static_assert(static_cast<uint32_t>(BuildGraphStatus::Success) == MLBuildGraphStatus_Success, "value mismatch for BuildGraphStatus::Success");
-    static_assert(static_cast<uint32_t>(BuildGraphStatus::Error) == MLBuildGraphStatus_Error, "value mismatch for BuildGraphStatus::Error");
-    static_assert(static_cast<uint32_t>(BuildGraphStatus::ContextLost) == MLBuildGraphStatus_ContextLost, "value mismatch for BuildGraphStatus::ContextLost");
-    static_assert(static_cast<uint32_t>(BuildGraphStatus::Unknown) == MLBuildGraphStatus_Unknown, "value mismatch for BuildGraphStatus::Unknown");
-
     // ComputeGraphStatus
 
     static_assert(sizeof(ComputeGraphStatus) == sizeof(MLComputeGraphStatus), "sizeof mismatch for ComputeGraphStatus");
@@ -30,6 +20,15 @@ namespace ml {
     static_assert(static_cast<uint32_t>(ComputeGraphStatus::Error) == MLComputeGraphStatus_Error, "value mismatch for ComputeGraphStatus::Error");
     static_assert(static_cast<uint32_t>(ComputeGraphStatus::ContextLost) == MLComputeGraphStatus_ContextLost, "value mismatch for ComputeGraphStatus::ContextLost");
     static_assert(static_cast<uint32_t>(ComputeGraphStatus::Unknown) == MLComputeGraphStatus_Unknown, "value mismatch for ComputeGraphStatus::Unknown");
+
+    // DevicePreference
+
+    static_assert(sizeof(DevicePreference) == sizeof(MLDevicePreference), "sizeof mismatch for DevicePreference");
+    static_assert(alignof(DevicePreference) == alignof(MLDevicePreference), "alignof mismatch for DevicePreference");
+
+    static_assert(static_cast<uint32_t>(DevicePreference::Default) == MLDevicePreference_Default, "value mismatch for DevicePreference::Default");
+    static_assert(static_cast<uint32_t>(DevicePreference::Gpu) == MLDevicePreference_Gpu, "value mismatch for DevicePreference::Gpu");
+    static_assert(static_cast<uint32_t>(DevicePreference::Cpu) == MLDevicePreference_Cpu, "value mismatch for DevicePreference::Cpu");
 
     // ErrorFilter
 
@@ -61,14 +60,6 @@ namespace ml {
     static_assert(static_cast<uint32_t>(FilterOperandLayout::Ohwi) == MLFilterOperandLayout_Ohwi, "value mismatch for FilterOperandLayout::Ohwi");
     static_assert(static_cast<uint32_t>(FilterOperandLayout::Ihwo) == MLFilterOperandLayout_Ihwo, "value mismatch for FilterOperandLayout::Ihwo");
 
-    // FusedActivation
-
-    static_assert(sizeof(FusedActivation) == sizeof(MLFusedActivation), "sizeof mismatch for FusedActivation");
-    static_assert(alignof(FusedActivation) == alignof(MLFusedActivation), "alignof mismatch for FusedActivation");
-
-    static_assert(static_cast<uint32_t>(FusedActivation::None) == MLFusedActivation_None, "value mismatch for FusedActivation::None");
-    static_assert(static_cast<uint32_t>(FusedActivation::Relu) == MLFusedActivation_Relu, "value mismatch for FusedActivation::Relu");
-
     // InputOperandLayout
 
     static_assert(sizeof(InputOperandLayout) == sizeof(MLInputOperandLayout), "sizeof mismatch for InputOperandLayout");
@@ -76,6 +67,14 @@ namespace ml {
 
     static_assert(static_cast<uint32_t>(InputOperandLayout::Nchw) == MLInputOperandLayout_Nchw, "value mismatch for InputOperandLayout::Nchw");
     static_assert(static_cast<uint32_t>(InputOperandLayout::Nhwc) == MLInputOperandLayout_Nhwc, "value mismatch for InputOperandLayout::Nhwc");
+
+    // InterpolationMode
+
+    static_assert(sizeof(InterpolationMode) == sizeof(MLInterpolationMode), "sizeof mismatch for InterpolationMode");
+    static_assert(alignof(InterpolationMode) == alignof(MLInterpolationMode), "alignof mismatch for InterpolationMode");
+
+    static_assert(static_cast<uint32_t>(InterpolationMode::NearestNeighbor) == MLInterpolationMode_NearestNeighbor, "value mismatch for InterpolationMode::NearestNeighbor");
+    static_assert(static_cast<uint32_t>(InterpolationMode::Linear) == MLInterpolationMode_Linear, "value mismatch for InterpolationMode::Linear");
 
     // OperandType
 
@@ -89,6 +88,16 @@ namespace ml {
     static_assert(static_cast<uint32_t>(OperandType::Int8) == MLOperandType_Int8, "value mismatch for OperandType::Int8");
     static_assert(static_cast<uint32_t>(OperandType::Uint8) == MLOperandType_Uint8, "value mismatch for OperandType::Uint8");
 
+    // PaddingMode
+
+    static_assert(sizeof(PaddingMode) == sizeof(MLPaddingMode), "sizeof mismatch for PaddingMode");
+    static_assert(alignof(PaddingMode) == alignof(MLPaddingMode), "alignof mismatch for PaddingMode");
+
+    static_assert(static_cast<uint32_t>(PaddingMode::Constant) == MLPaddingMode_Constant, "value mismatch for PaddingMode::Constant");
+    static_assert(static_cast<uint32_t>(PaddingMode::Edge) == MLPaddingMode_Edge, "value mismatch for PaddingMode::Edge");
+    static_assert(static_cast<uint32_t>(PaddingMode::Reflection) == MLPaddingMode_Reflection, "value mismatch for PaddingMode::Reflection");
+    static_assert(static_cast<uint32_t>(PaddingMode::Symmetric) == MLPaddingMode_Symmetric, "value mismatch for PaddingMode::Symmetric");
+
     // PowerPreference
 
     static_assert(sizeof(PowerPreference) == sizeof(MLPowerPreference), "sizeof mismatch for PowerPreference");
@@ -100,6 +109,18 @@ namespace ml {
 
     // ChainedStruct
 
+
+    // ArrayBufferView
+
+    static_assert(sizeof(ArrayBufferView) == sizeof(MLArrayBufferView), "sizeof mismatch for ArrayBufferView");
+    static_assert(alignof(ArrayBufferView) == alignof(MLArrayBufferView), "alignof mismatch for ArrayBufferView");
+
+    static_assert(offsetof(ArrayBufferView, buffer) == offsetof(MLArrayBufferView, buffer),
+            "offsetof mismatch for ArrayBufferView::buffer");
+    static_assert(offsetof(ArrayBufferView, byteLength) == offsetof(MLArrayBufferView, byteLength),
+            "offsetof mismatch for ArrayBufferView::byteLength");
+    static_assert(offsetof(ArrayBufferView, byteOffset) == offsetof(MLArrayBufferView, byteOffset),
+            "offsetof mismatch for ArrayBufferView::byteOffset");
 
     // BatchNormOptions
 
@@ -114,8 +135,6 @@ namespace ml {
             "offsetof mismatch for BatchNormOptions::axis");
     static_assert(offsetof(BatchNormOptions, epsilon) == offsetof(MLBatchNormOptions, epsilon),
             "offsetof mismatch for BatchNormOptions::epsilon");
-    static_assert(offsetof(BatchNormOptions, activation) == offsetof(MLBatchNormOptions, activation),
-            "offsetof mismatch for BatchNormOptions::activation");
 
     // ClampOptions
 
@@ -132,6 +151,8 @@ namespace ml {
     static_assert(sizeof(ContextOptions) == sizeof(MLContextOptions), "sizeof mismatch for ContextOptions");
     static_assert(alignof(ContextOptions) == alignof(MLContextOptions), "alignof mismatch for ContextOptions");
 
+    static_assert(offsetof(ContextOptions, devicePreference) == offsetof(MLContextOptions, devicePreference),
+            "offsetof mismatch for ContextOptions::devicePreference");
     static_assert(offsetof(ContextOptions, powerPreference) == offsetof(MLContextOptions, powerPreference),
             "offsetof mismatch for ContextOptions::powerPreference");
 
@@ -160,10 +181,6 @@ namespace ml {
             "offsetof mismatch for Conv2dOptions::inputLayout");
     static_assert(offsetof(Conv2dOptions, filterLayout) == offsetof(MLConv2dOptions, filterLayout),
             "offsetof mismatch for Conv2dOptions::filterLayout");
-    static_assert(offsetof(Conv2dOptions, bias) == offsetof(MLConv2dOptions, bias),
-            "offsetof mismatch for Conv2dOptions::bias");
-    static_assert(offsetof(Conv2dOptions, activation) == offsetof(MLConv2dOptions, activation),
-            "offsetof mismatch for Conv2dOptions::activation");
 
     // GemmOptions
 
@@ -181,19 +198,19 @@ namespace ml {
     static_assert(offsetof(GemmOptions, bTranspose) == offsetof(MLGemmOptions, bTranspose),
             "offsetof mismatch for GemmOptions::bTranspose");
 
-    // Input
+    // InstanceNormOptions
 
-    static_assert(sizeof(Input) == sizeof(MLInput), "sizeof mismatch for Input");
-    static_assert(alignof(Input) == alignof(MLInput), "alignof mismatch for Input");
+    static_assert(sizeof(InstanceNormOptions) == sizeof(MLInstanceNormOptions), "sizeof mismatch for InstanceNormOptions");
+    static_assert(alignof(InstanceNormOptions) == alignof(MLInstanceNormOptions), "alignof mismatch for InstanceNormOptions");
 
-    static_assert(offsetof(Input, buffer) == offsetof(MLInput, buffer),
-            "offsetof mismatch for Input::buffer");
-    static_assert(offsetof(Input, size) == offsetof(MLInput, size),
-            "offsetof mismatch for Input::size");
-    static_assert(offsetof(Input, dimensions) == offsetof(MLInput, dimensions),
-            "offsetof mismatch for Input::dimensions");
-    static_assert(offsetof(Input, dimensionsCount) == offsetof(MLInput, dimensionsCount),
-            "offsetof mismatch for Input::dimensionsCount");
+    static_assert(offsetof(InstanceNormOptions, scale) == offsetof(MLInstanceNormOptions, scale),
+            "offsetof mismatch for InstanceNormOptions::scale");
+    static_assert(offsetof(InstanceNormOptions, bias) == offsetof(MLInstanceNormOptions, bias),
+            "offsetof mismatch for InstanceNormOptions::bias");
+    static_assert(offsetof(InstanceNormOptions, epsilon) == offsetof(MLInstanceNormOptions, epsilon),
+            "offsetof mismatch for InstanceNormOptions::epsilon");
+    static_assert(offsetof(InstanceNormOptions, layout) == offsetof(MLInstanceNormOptions, layout),
+            "offsetof mismatch for InstanceNormOptions::layout");
 
     // LeakyReluOptions
 
@@ -215,19 +232,15 @@ namespace ml {
     static_assert(offsetof(OperandDescriptor, dimensionsCount) == offsetof(MLOperandDescriptor, dimensionsCount),
             "offsetof mismatch for OperandDescriptor::dimensionsCount");
 
-    // Output
+    // PadOptions
 
-    static_assert(sizeof(Output) == sizeof(MLOutput), "sizeof mismatch for Output");
-    static_assert(alignof(Output) == alignof(MLOutput), "alignof mismatch for Output");
+    static_assert(sizeof(PadOptions) == sizeof(MLPadOptions), "sizeof mismatch for PadOptions");
+    static_assert(alignof(PadOptions) == alignof(MLPadOptions), "alignof mismatch for PadOptions");
 
-    static_assert(offsetof(Output, buffer) == offsetof(MLOutput, buffer),
-            "offsetof mismatch for Output::buffer");
-    static_assert(offsetof(Output, size) == offsetof(MLOutput, size),
-            "offsetof mismatch for Output::size");
-    static_assert(offsetof(Output, dimensions) == offsetof(MLOutput, dimensions),
-            "offsetof mismatch for Output::dimensions");
-    static_assert(offsetof(Output, dimensionsCount) == offsetof(MLOutput, dimensionsCount),
-            "offsetof mismatch for Output::dimensionsCount");
+    static_assert(offsetof(PadOptions, mode) == offsetof(MLPadOptions, mode),
+            "offsetof mismatch for PadOptions::mode");
+    static_assert(offsetof(PadOptions, value) == offsetof(MLPadOptions, value),
+            "offsetof mismatch for PadOptions::value");
 
     // Pool2dOptions
 
@@ -255,6 +268,34 @@ namespace ml {
     static_assert(offsetof(Pool2dOptions, layout) == offsetof(MLPool2dOptions, layout),
             "offsetof mismatch for Pool2dOptions::layout");
 
+    // ReduceMeanOptions
+
+    static_assert(sizeof(ReduceMeanOptions) == sizeof(MLReduceMeanOptions), "sizeof mismatch for ReduceMeanOptions");
+    static_assert(alignof(ReduceMeanOptions) == alignof(MLReduceMeanOptions), "alignof mismatch for ReduceMeanOptions");
+
+    static_assert(offsetof(ReduceMeanOptions, axesCount) == offsetof(MLReduceMeanOptions, axesCount),
+            "offsetof mismatch for ReduceMeanOptions::axesCount");
+    static_assert(offsetof(ReduceMeanOptions, axes) == offsetof(MLReduceMeanOptions, axes),
+            "offsetof mismatch for ReduceMeanOptions::axes");
+    static_assert(offsetof(ReduceMeanOptions, keepDimensions) == offsetof(MLReduceMeanOptions, keepDimensions),
+            "offsetof mismatch for ReduceMeanOptions::keepDimensions");
+
+    // ResampleOptions
+
+    static_assert(sizeof(ResampleOptions) == sizeof(MLResampleOptions), "sizeof mismatch for ResampleOptions");
+    static_assert(alignof(ResampleOptions) == alignof(MLResampleOptions), "alignof mismatch for ResampleOptions");
+
+    static_assert(offsetof(ResampleOptions, mode) == offsetof(MLResampleOptions, mode),
+            "offsetof mismatch for ResampleOptions::mode");
+    static_assert(offsetof(ResampleOptions, scalesCount) == offsetof(MLResampleOptions, scalesCount),
+            "offsetof mismatch for ResampleOptions::scalesCount");
+    static_assert(offsetof(ResampleOptions, scales) == offsetof(MLResampleOptions, scales),
+            "offsetof mismatch for ResampleOptions::scales");
+    static_assert(offsetof(ResampleOptions, sizesCount) == offsetof(MLResampleOptions, sizesCount),
+            "offsetof mismatch for ResampleOptions::sizesCount");
+    static_assert(offsetof(ResampleOptions, sizes) == offsetof(MLResampleOptions, sizes),
+            "offsetof mismatch for ResampleOptions::sizes");
+
     // TransposeOptions
 
     static_assert(sizeof(TransposeOptions) == sizeof(MLTransposeOptions), "sizeof mismatch for TransposeOptions");
@@ -264,6 +305,18 @@ namespace ml {
             "offsetof mismatch for TransposeOptions::permutationCount");
     static_assert(offsetof(TransposeOptions, permutation) == offsetof(MLTransposeOptions, permutation),
             "offsetof mismatch for TransposeOptions::permutation");
+
+    // Input
+
+    static_assert(sizeof(Input) == sizeof(MLInput), "sizeof mismatch for Input");
+    static_assert(alignof(Input) == alignof(MLInput), "alignof mismatch for Input");
+
+    static_assert(offsetof(Input, resource) == offsetof(MLInput, resource),
+            "offsetof mismatch for Input::resource");
+    static_assert(offsetof(Input, dimensions) == offsetof(MLInput, dimensions),
+            "offsetof mismatch for Input::dimensions");
+    static_assert(offsetof(Input, dimensionsCount) == offsetof(MLInput, dimensionsCount),
+            "offsetof mismatch for Input::dimensionsCount");
 
     // Context
 
@@ -296,11 +349,8 @@ namespace ml {
     static_assert(sizeof(Graph) == sizeof(MLGraph), "sizeof mismatch for Graph");
     static_assert(alignof(Graph) == alignof(MLGraph), "alignof mismatch for Graph");
 
-    void Graph::Compute(NamedInputs const& inputs, ComputeGraphCallback callback, void * userdata, NamedOutputs const& outputs) const {
-        mlGraphCompute(GetHandle(), inputs.GetHandle(), callback, reinterpret_cast<void * >(userdata), outputs.GetHandle());
-    }
-    ComputeGraphStatus Graph::ComputeSync(NamedInputs const& inputs, NamedOutputs const& outputs) const {
-        auto result = mlGraphComputeSync(GetHandle(), inputs.GetHandle(), outputs.GetHandle());
+    ComputeGraphStatus Graph::Compute(NamedInputs const& inputs, NamedOutputs const& outputs) const {
+        auto result = mlGraphCompute(GetHandle(), inputs.GetHandle(), outputs.GetHandle());
         return static_cast<ComputeGraphStatus>(result);
     }
     void Graph::WebnnReference(MLGraph handle) {
@@ -331,11 +381,8 @@ namespace ml {
         auto result = mlGraphBuilderBatchNorm(GetHandle(), input.GetHandle(), mean.GetHandle(), variance.GetHandle(), reinterpret_cast<MLBatchNormOptions const * >(options));
         return Operand::Acquire(result);
     }
-    void GraphBuilder::Build(NamedOperands const& namedOperands, BuildGraphCallback callback, void * userdata) const {
-        mlGraphBuilderBuild(GetHandle(), namedOperands.GetHandle(), callback, reinterpret_cast<void * >(userdata));
-    }
-    Graph GraphBuilder::BuildSync(NamedOperands const& namedOperands) const {
-        auto result = mlGraphBuilderBuildSync(GetHandle(), namedOperands.GetHandle());
+    Graph GraphBuilder::Build(NamedOperands const& namedOperands) const {
+        auto result = mlGraphBuilderBuild(GetHandle(), namedOperands.GetHandle());
         return Graph::Acquire(result);
     }
     Operand GraphBuilder::Clamp(Operand const& input, ClampOptions const * options) const {
@@ -346,12 +393,16 @@ namespace ml {
         auto result = mlGraphBuilderConcat(GetHandle(), inputsCount, reinterpret_cast<MLOperand const * >(inputs), axis);
         return Operand::Acquire(result);
     }
-    Operand GraphBuilder::Constant(OperandDescriptor const * desc, void const * value, size_t size) const {
-        auto result = mlGraphBuilderConstant(GetHandle(), reinterpret_cast<MLOperandDescriptor const * >(desc), reinterpret_cast<void const * >(value), size);
+    Operand GraphBuilder::Constant(OperandDescriptor const * desc, ArrayBufferView const * value) const {
+        auto result = mlGraphBuilderConstant(GetHandle(), reinterpret_cast<MLOperandDescriptor const * >(desc), reinterpret_cast<MLArrayBufferView const * >(value));
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::Conv2d(Operand const& input, Operand const& filter, Conv2dOptions const * options) const {
         auto result = mlGraphBuilderConv2d(GetHandle(), input.GetHandle(), filter.GetHandle(), reinterpret_cast<MLConv2dOptions const * >(options));
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::Div(Operand const& a, Operand const& b) const {
+        auto result = mlGraphBuilderDiv(GetHandle(), a.GetHandle(), b.GetHandle());
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::Gemm(Operand const& a, Operand const& b, GemmOptions const * options) const {
@@ -360,6 +411,10 @@ namespace ml {
     }
     Operand GraphBuilder::Input(char const * name, OperandDescriptor const * desc) const {
         auto result = mlGraphBuilderInput(GetHandle(), reinterpret_cast<char const * >(name), reinterpret_cast<MLOperandDescriptor const * >(desc));
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::InstanceNorm(Operand const& input, InstanceNormOptions const * options) const {
+        auto result = mlGraphBuilderInstanceNorm(GetHandle(), input.GetHandle(), reinterpret_cast<MLInstanceNormOptions const * >(options));
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::LeakyRelu(Operand const& input, LeakyReluOptions const * options) const {
@@ -378,12 +433,28 @@ namespace ml {
         auto result = mlGraphBuilderMul(GetHandle(), a.GetHandle(), b.GetHandle());
         return Operand::Acquire(result);
     }
+    Operand GraphBuilder::Pad(Operand const& input, Operand const& padding, PadOptions const * options) const {
+        auto result = mlGraphBuilderPad(GetHandle(), input.GetHandle(), padding.GetHandle(), reinterpret_cast<MLPadOptions const * >(options));
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::ReduceMean(Operand const& input, ReduceMeanOptions const * options) const {
+        auto result = mlGraphBuilderReduceMean(GetHandle(), input.GetHandle(), reinterpret_cast<MLReduceMeanOptions const * >(options));
+        return Operand::Acquire(result);
+    }
     Operand GraphBuilder::Relu(Operand const& input) const {
         auto result = mlGraphBuilderRelu(GetHandle(), input.GetHandle());
         return Operand::Acquire(result);
     }
+    Operand GraphBuilder::Resample(Operand const& input, ResampleOptions const * options) const {
+        auto result = mlGraphBuilderResample(GetHandle(), input.GetHandle(), reinterpret_cast<MLResampleOptions const * >(options));
+        return Operand::Acquire(result);
+    }
     Operand GraphBuilder::Reshape(Operand const& input, int32_t const * newShape, uint32_t newShapeCount) const {
         auto result = mlGraphBuilderReshape(GetHandle(), input.GetHandle(), reinterpret_cast<int32_t const * >(newShape), newShapeCount);
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::Sigmoid(Operand const& input) const {
+        auto result = mlGraphBuilderSigmoid(GetHandle(), input.GetHandle());
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::Softmax(Operand const& input) const {
@@ -392,6 +463,10 @@ namespace ml {
     }
     Operand GraphBuilder::Sub(Operand const& a, Operand const& b) const {
         auto result = mlGraphBuilderSub(GetHandle(), a.GetHandle(), b.GetHandle());
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::Tanh(Operand const& input) const {
+        auto result = mlGraphBuilderTanh(GetHandle(), input.GetHandle());
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::Transpose(Operand const& input, TransposeOptions const * options) const {
@@ -452,8 +527,8 @@ namespace ml {
     static_assert(sizeof(NamedOutputs) == sizeof(MLNamedOutputs), "sizeof mismatch for NamedOutputs");
     static_assert(alignof(NamedOutputs) == alignof(MLNamedOutputs), "alignof mismatch for NamedOutputs");
 
-    void NamedOutputs::Set(char const * name, Output const * output) const {
-        mlNamedOutputsSet(GetHandle(), reinterpret_cast<char const * >(name), reinterpret_cast<MLOutput const * >(output));
+    void NamedOutputs::Set(char const * name, ArrayBufferView const * resource) const {
+        mlNamedOutputsSet(GetHandle(), reinterpret_cast<char const * >(name), reinterpret_cast<MLArrayBufferView const * >(resource));
     }
     void NamedOutputs::WebnnReference(MLNamedOutputs handle) {
         if (handle != nullptr) {
@@ -463,26 +538,6 @@ namespace ml {
     void NamedOutputs::WebnnRelease(MLNamedOutputs handle) {
         if (handle != nullptr) {
             mlNamedOutputsRelease(handle);
-        }
-    }
-
-    // NamedResults
-
-    static_assert(sizeof(NamedResults) == sizeof(MLNamedResults), "sizeof mismatch for NamedResults");
-    static_assert(alignof(NamedResults) == alignof(MLNamedResults), "alignof mismatch for NamedResults");
-
-    Result NamedResults::Get(char const * name) const {
-        auto result = mlNamedResultsGet(GetHandle(), reinterpret_cast<char const * >(name));
-        return Result::Acquire(result);
-    }
-    void NamedResults::WebnnReference(MLNamedResults handle) {
-        if (handle != nullptr) {
-            mlNamedResultsReference(handle);
-        }
-    }
-    void NamedResults::WebnnRelease(MLNamedResults handle) {
-        if (handle != nullptr) {
-            mlNamedResultsRelease(handle);
         }
     }
 
@@ -502,35 +557,19 @@ namespace ml {
         }
     }
 
-    // Result
+    // Operator
 
-    static_assert(sizeof(Result) == sizeof(MLResult), "sizeof mismatch for Result");
-    static_assert(alignof(Result) == alignof(MLResult), "alignof mismatch for Result");
+    static_assert(sizeof(Operator) == sizeof(MLOperator), "sizeof mismatch for Operator");
+    static_assert(alignof(Operator) == alignof(MLOperator), "alignof mismatch for Operator");
 
-    const void* Result::Buffer() const {
-        auto result = mlResultBuffer(GetHandle());
-        return result;
-    }
-    uint32_t Result::BufferSize() const {
-        auto result = mlResultBufferSize(GetHandle());
-        return result;
-    }
-    const int32_t* Result::Dimensions() const {
-        auto result = mlResultDimensions(GetHandle());
-        return result;
-    }
-    uint32_t Result::DimensionsSize() const {
-        auto result = mlResultDimensionsSize(GetHandle());
-        return result;
-    }
-    void Result::WebnnReference(MLResult handle) {
+    void Operator::WebnnReference(MLOperator handle) {
         if (handle != nullptr) {
-            mlResultReference(handle);
+            mlOperatorReference(handle);
         }
     }
-    void Result::WebnnRelease(MLResult handle) {
+    void Operator::WebnnRelease(MLOperator handle) {
         if (handle != nullptr) {
-            mlResultRelease(handle);
+            mlOperatorRelease(handle);
         }
     }
 
