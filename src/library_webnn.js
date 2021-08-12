@@ -424,7 +424,12 @@ var LibraryWebNN = {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var desc = WebNN.makeOperandDescriptor(descPtr);
     var buffer = WebNN.makeArrayBufferView(arrayBufferViewPtr, desc.type);
-    var constant = builder.constant(desc, buffer);
+    var constant;
+    if (desc.dimensions === undefined) {
+      constant = builder.constant(buffer[0]);
+    } else {
+      constant = builder.constant(desc, buffer);
+    }
     return WebNN.mgrOperand.create(constant);
   },
 
