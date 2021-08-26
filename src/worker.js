@@ -14,7 +14,7 @@ var Module = {};
 
 #if ENVIRONMENT_MAY_BE_NODE
 // Node.js support
-if (typeof process === 'object' && typeof process.versions === 'object' && typeof process.versions.node === 'string') {
+if (typeof process === 'object' && typeof process.versions === 'object' && typeof process.versions.node === 'string' && global.Worker === undefined) {
   // Create as web-worker-like an environment as we can.
 
   var nodeWorkerThreads = require('worker_threads');

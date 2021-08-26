@@ -417,7 +417,7 @@ var LibraryPThread = {
       };
 
 #if ENVIRONMENT_MAY_BE_NODE
-      if (ENVIRONMENT_IS_NODE) {
+      if (ENVIRONMENT_IS_NODE && worker.on !== undefined) {
         worker.on('message', function(data) {
           worker.onmessage({ data: data });
         });
