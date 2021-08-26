@@ -197,14 +197,16 @@ if (ENVIRONMENT_IS_NODE) {
   Module['inspect'] = function () { return '[Emscripten Module object]'; };
 
 #if USE_PTHREADS
-  var nodeWorkerThreads;
-  try {
-    nodeWorkerThreads = require('worker_threads');
-  } catch (e) {
-    console.error('The "worker_threads" module is not supported in this node.js build - perhaps a newer version is needed?');
-    throw e;
+  if (global.Worker === undefined) {
+    var nodeWorkerThreads;
+    try {
+      nodeWorkerThreads = require('worker_threads');
+    } catch (e) {
+      console.error('The "worker_threads" module is not supported in this node.js build - perhaps a newer version is needed?');
+      throw e;
+    }
+    global.Worker = nodeWorkerThreads.Worker;
   }
-  global.Worker = nodeWorkerThreads.Worker;
 #endif
 
 #if WASM == 2
