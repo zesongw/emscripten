@@ -303,3 +303,8 @@ var GPUOutOfMemoryError;
  * Avoid closure minifying anything to "id". See #13965
  */
 var id;
+
+/*
+ * WebNN globals
+ */
+var MLGraphBuilder;

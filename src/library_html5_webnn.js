@@ -3,8 +3,8 @@ mergeInto(LibraryManager.library, {
   emscripten_webnn_create_context__postset: 'WebNN.initManagers();',
   emscripten_webnn_create_context: function(optionsPtr) {
     var options = {
-      "devicePreference": "default",
-      "powerPreference": "default"
+      'devicePreference': 'default',
+      'powerPreference': 'default'
     };
 
     var DevicePreference = [
@@ -14,18 +14,18 @@ mergeInto(LibraryManager.library, {
     ];
     var PowerPreference = [
       'default',
-      'high_performance',
-      'low_power',
+      'high-performance',
+      'low-power',
     ];
     if (optionsPtr !== 0) {
       options = {
-          "devicePreference": DevicePreference[
+          'devicePreference': DevicePreference[
             {{{ makeGetValue('optionsPtr', C_STRUCTS.MLContextOptions.devicePreference, 'i32', false, true) }}}],
-          "powerPreference": DevicePreference[
+          'powerPreference': PowerPreference[
             {{{ makeGetValue('optionsPtr', C_STRUCTS.MLContextOptions.powerPreference, 'i32', false, true) }}}]
       };
     }
-    var context = navigator.ml.createContext(options);
+    var context = navigator['ml'].createContext(options);
     return WebNN.mgrContext.create(context);
   },
 });
