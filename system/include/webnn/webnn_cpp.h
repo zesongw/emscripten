@@ -4,6 +4,8 @@
 #include "webnn/webnn.h"
 #include "webnn/EnumClassBitmasks.h"
 
+#include <limits>
+
 namespace ml {
 
     enum class AutoPad : uint32_t {
@@ -78,6 +80,17 @@ namespace ml {
         Low_power = 0x00000002,
     };
 
+    enum class RecurrentNetworkDirection : uint32_t {
+        Forward = 0x00000000,
+        Backward = 0x00000001,
+        Both = 0x00000002,
+    };
+
+    enum class RecurrentNetworkWeightLayout : uint32_t {
+        Zrn = 0x00000000,
+        Rzn = 0x00000001,
+    };
+
 
 
 
@@ -91,6 +104,7 @@ namespace ml {
     class NamedOperands;
     class NamedOutputs;
     class Operand;
+    class OperandArray;
     class Operator;
 
     struct ArrayBufferView;
@@ -99,14 +113,19 @@ namespace ml {
     struct ContextOptions;
     struct Conv2dOptions;
     struct GemmOptions;
+    struct GruOperators;
     struct InstanceNormOptions;
     struct LeakyReluOptions;
     struct OperandDescriptor;
     struct PadOptions;
     struct Pool2dOptions;
-    struct ReduceMeanOptions;
+    struct ReduceOptions;
     struct ResampleOptions;
+    struct SliceOptions;
+    struct SplitOptions;
+    struct SqueezeOptions;
     struct TransposeOptions;
+    struct GruOptions;
     struct Input;
 
     template<typename Derived, typename CType>
@@ -224,26 +243,46 @@ namespace ml {
         Operand BatchNorm(Operand const& input, Operand const& mean, Operand const& variance, BatchNormOptions const * options = nullptr) const;
         Graph Build(NamedOperands const& namedOperands) const;
         Operand Clamp(Operand const& input, ClampOptions const * options = nullptr) const;
+        Operator ClampOperator(ClampOptions const * options = nullptr) const;
         Operand Concat(uint32_t inputsCount, Operand const * inputs, uint32_t axis) const;
         Operand Constant(OperandDescriptor const * desc, ArrayBufferView const * value) const;
         Operand Conv2d(Operand const& input, Operand const& filter, Conv2dOptions const * options = nullptr) const;
         Operand Div(Operand const& a, Operand const& b) const;
         Operand Gemm(Operand const& a, Operand const& b, GemmOptions const * options = nullptr) const;
+        OperandArray Gru(Operand const& input, Operand const& weight, Operand const& recurrentWeight, int32_t steps, int32_t hiddenSize, GruOptions const * options = nullptr) const;
+        Operand HardSwish(Operand const& input) const;
+        Operator HardSwishOperator() const;
         Operand Input(char const * name, OperandDescriptor const * desc) const;
         Operand InstanceNorm(Operand const& input, InstanceNormOptions const * options = nullptr) const;
         Operand LeakyRelu(Operand const& input, LeakyReluOptions const * options = nullptr) const;
+        Operator LeakyReluOperator(LeakyReluOptions const * options = nullptr) const;
         Operand Matmul(Operand const& a, Operand const& b) const;
+        Operand Max(Operand const& a, Operand const& b) const;
         Operand MaxPool2d(Operand const& input, Pool2dOptions const * options = nullptr) const;
+        Operand Min(Operand const& a, Operand const& b) const;
         Operand Mul(Operand const& a, Operand const& b) const;
         Operand Pad(Operand const& input, Operand const& padding, PadOptions const * options = nullptr) const;
-        Operand ReduceMean(Operand const& input, ReduceMeanOptions const * options = nullptr) const;
+        Operand Pow(Operand const& a, Operand const& b) const;
+        Operand ReduceL1(Operand const& input, ReduceOptions const * options = nullptr) const;
+        Operand ReduceL2(Operand const& input, ReduceOptions const * options = nullptr) const;
+        Operand ReduceMax(Operand const& input, ReduceOptions const * options = nullptr) const;
+        Operand ReduceMean(Operand const& input, ReduceOptions const * options = nullptr) const;
+        Operand ReduceMin(Operand const& input, ReduceOptions const * options = nullptr) const;
+        Operand ReduceProduct(Operand const& input, ReduceOptions const * options = nullptr) const;
+        Operand ReduceSum(Operand const& input, ReduceOptions const * options = nullptr) const;
         Operand Relu(Operand const& input) const;
+        Operator ReluOperator() const;
         Operand Resample(Operand const& input, ResampleOptions const * options = nullptr) const;
         Operand Reshape(Operand const& input, int32_t const * newShape, uint32_t newShapeCount) const;
         Operand Sigmoid(Operand const& input) const;
+        Operator SigmoidOperator() const;
+        Operand Slice(Operand const& input, int32_t const * starts, uint32_t startsCount, int32_t const * sizes, uint32_t sizesCount, SliceOptions const * options = nullptr) const;
         Operand Softmax(Operand const& input) const;
+        OperandArray Split(Operand const& input, uint32_t const * splits, uint32_t splitsCount, SplitOptions const * options = nullptr) const;
+        Operand Squeeze(Operand const& input, SqueezeOptions const * options = nullptr) const;
         Operand Sub(Operand const& a, Operand const& b) const;
         Operand Tanh(Operand const& input) const;
+        Operator TanhOperator() const;
         Operand Transpose(Operand const& input, TransposeOptions const * options = nullptr) const;
 
       private:
@@ -303,6 +342,20 @@ namespace ml {
         static void WebnnRelease(MLOperand handle);
     };
 
+    class OperandArray : public ObjectBase<OperandArray, MLOperandArray> {
+      public:
+        using ObjectBase::ObjectBase;
+        using ObjectBase::operator=;
+
+        Operand Get(size_t index) const;
+        size_t Size() const;
+
+      private:
+        friend ObjectBase<OperandArray, MLOperandArray>;
+        static void WebnnReference(MLOperandArray handle);
+        static void WebnnRelease(MLOperandArray handle);
+    };
+
     class Operator : public ObjectBase<Operator, MLOperator> {
       public:
         using ObjectBase::ObjectBase;
@@ -332,11 +385,12 @@ namespace ml {
         Operand bias;
         uint32_t axis = 1;
         float epsilon = 1e-05;
+        Operator activation;
     };
 
     struct ClampOptions {
-        Operand minValue;
-        Operand maxValue;
+        float minValue = std::numeric_limits<float>::lowest();
+        float maxValue = std::numeric_limits<float>::max();
     };
 
     struct ContextOptions {
@@ -351,10 +405,17 @@ namespace ml {
         int32_t const * strides = nullptr;
         uint32_t dilationsCount = 0;
         int32_t const * dilations = nullptr;
+        uint32_t outputPaddingCount = 0;
+        int32_t const * outputPadding = nullptr;
+        uint32_t outputSizesCount = 0;
+        int32_t const * outputSizes = nullptr;
         AutoPad autoPad = AutoPad::Explicit;
+        bool transpose = false;
         int32_t groups = 1;
         InputOperandLayout inputLayout = InputOperandLayout::Nchw;
         FilterOperandLayout filterLayout = FilterOperandLayout::Oihw;
+        Operand bias;
+        Operator activation;
     };
 
     struct GemmOptions {
@@ -363,6 +424,11 @@ namespace ml {
         float beta = 1.0;
         bool aTranspose = false;
         bool bTranspose = false;
+    };
+
+    struct GruOperators {
+        Operator resetGateActivation;
+        Operator newGateActivation;
     };
 
     struct InstanceNormOptions {
@@ -400,7 +466,7 @@ namespace ml {
         InputOperandLayout layout = InputOperandLayout::Nchw;
     };
 
-    struct ReduceMeanOptions {
+    struct ReduceOptions {
         uint32_t axesCount = 0;
         int32_t const * axes = nullptr;
         bool keepDimensions = false;
@@ -414,9 +480,34 @@ namespace ml {
         int32_t const * sizes = nullptr;
     };
 
+    struct SliceOptions {
+        uint32_t axesCount = 0;
+        int32_t const * axes = nullptr;
+    };
+
+    struct SplitOptions {
+        int32_t axis = 0;
+    };
+
+    struct SqueezeOptions {
+        uint32_t axesCount = 0;
+        int32_t const * axes = nullptr;
+    };
+
     struct TransposeOptions {
         uint32_t permutationCount = 0;
         int32_t const * permutation = nullptr;
+    };
+
+    struct GruOptions {
+        Operand bias;
+        Operand recurrentBias;
+        Operand initialHiddenState;
+        bool resetAfter = true;
+        bool returnSequence = false;
+        RecurrentNetworkDirection direction = RecurrentNetworkDirection::Forward;
+        RecurrentNetworkWeightLayout layout = RecurrentNetworkWeightLayout::Zrn;
+        GruOperators activations;
     };
 
     struct Input {
