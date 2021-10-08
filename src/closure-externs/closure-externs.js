@@ -284,3 +284,8 @@ var registerProcessor = function(name, obj) {};
 var currentFrame;
 var currentTime;
 var sampleRate;
+
+/*
+ * WebNN globals
+ */
+var MLGraphBuilder;
