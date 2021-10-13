@@ -220,9 +220,17 @@ var LibraryWebNN = {
       const offset = {{{ makeGetValue('ptr', C_STRUCTS.MLArrayBufferView.buffer, '*') }}} + 
           {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLArrayBufferView.byteOffset) }}};
       const byteSize = {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLArrayBufferView.byteLength) }}};
-      assert(type === "float32");
-      // TODO: support other array buffer view types.
-      return new Float32Array(HEAPU8.buffer, offset, byteSize / Float32Array.BYTES_PER_ELEMENT);
+      if (type === "float32") {
+        return new Float32Array(HEAPU8.buffer, offset, byteSize / Float32Array.BYTES_PER_ELEMENT);
+      } else if (type === "uint32") {
+        return new Uint32Array(HEAPU8.buffer, offset, byteSize / Uint32Array.BYTES_PER_ELEMENT);
+      } else if (type === "int32") {
+        return new Int32Array(HEAPU8.buffer, offset, byteSize / Uint32Array.BYTES_PER_ELEMENT);
+      } else {
+        // TODO: support other array buffer view types.
+        console.warn(`operand type ${type} is not supported.`);
+        assert(false);
+      }
     },
 
     makeClampOptions: function(ptr) {
@@ -328,6 +336,25 @@ var LibraryWebNN = {
           {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLPool2dOptions.layout) }}}
         ],
       };
+    },
+
+    makePadOptions: function(ptr) {
+      return {
+        "mode": WebNN.PaddingMode[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLPadOptions.mode) }}}
+        ],
+        "value": {{{ webnn.makeGetF32('ptr', C_STRUCTS.MLPadOptions.value) }}},
+      }
+    },
+
+    makeReduceOptions: function(ptr) {
+      return {
+        "axes": WebNN.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLReduceOptions.axesCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLReduceOptions.axes, '*') }}}
+        ),
+        "keepDimensions": {{{ webnn.makeGetBool('ptr', C_STRUCTS.MLReduceOptions.keepDimensions)}}},
+      }
     },
 
     makeInput: function(ptr) {
@@ -531,6 +558,23 @@ var LibraryWebNN = {
     var b = WebNN.mgrOperand.get(bId);
     var c = builder["mul"](a, b);
     return WebNN.mgrOperand.create(c);
+  },
+
+  mlGraphBuilderPad: function(builderId, inputId, paddingId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var padding = WebNN.mgrOperand.get(paddingId);
+    var options = WebNN.makePadOptions(optionsPtr);
+    var output = builder["pad"](input, padding, options);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderReduceMean: function(builderId, inputId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var options = WebNN.makeReduceOptions(optionsPtr);
+    var output = builder["reduceMean"](input, options);
+    return WebNN.mgrOperand.create(output);
   },
 
   mlGraphBuilderRelu: function(builderId, inputId) {
