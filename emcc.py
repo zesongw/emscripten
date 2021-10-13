@@ -2610,9 +2610,6 @@ def parse_args(newargs):
       else:
         config.generate_config(optarg)
       should_exit = True
-    # Record USE_PTHREADS setting because it controls whether --shared-memory is passed to lld
-    elif arg == '-pthread':
-      settings_changes.append('USE_PTHREADS=1')
     elif arg in ('-fno-diagnostics-color', '-fdiagnostics-color=never'):
       colored_logger.disable()
       diagnostics.color_enabled = False
