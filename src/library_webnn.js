@@ -306,6 +306,15 @@ var LibraryWebNN = {
         ],
         "bias": WebNN.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.bias, '*') }}}),
         "activation": WebNN.mgrOperator.get({{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.activation, '*') }}}),
+        "transpose": {{{ webnn.makeGetBool('ptr', C_STRUCTS.MLConv2dOptions.transpose)}}},
+        "outputPadding": WebNN.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConv2dOptions.outputPaddingCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.outputPadding, '*') }}}
+        ),
+        "outputSizes": WebNN.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConv2dOptions.outputSizesCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.outputSizes, '*') }}}
+        ),
       };
     },
 
@@ -521,6 +530,19 @@ var LibraryWebNN = {
     return WebNN.mgrOperand.create(input);
   },
 
+  mlGraphBuilderHardSwish: function(builderId, inputId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var output = builder["hardSwish"](input);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderHardSwishOperator: function(builderId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var output = builder["hardSwish"]();
+    return WebNN.mgrOperator.create(output);
+  },
+
   mlGraphBuilderLeakyRelu: function(builderId, inputId, optionsPtr) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var input = WebNN.mgrOperand.get(inputId);
@@ -604,6 +626,19 @@ var LibraryWebNN = {
     var newShape = WebNN.makeI32Array(newShapeCount, newShapePtr);
     var output = builder["reshape"](input, newShape);
     return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderSigmoid: function(builderId, inputId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var output = builder["sigmoid"](input);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderSigmoidOperator: function(builderId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var output = builder["sigmoid"]();
+    return WebNN.mgrOperator.create(output);
   },
 
   mlGraphBuilderSoftmax: function(builderId, inputId) {
