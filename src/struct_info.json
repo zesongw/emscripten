@@ -1422,9 +1422,15 @@
                 "aTranspose",
                 "bTranspose"
             ],
-            "MLGruOperators": [
-                "resetGateActivation",
-                "newGateActivation"
+            "MLGruOptions": [
+                "bias",
+                "recurrentBias",
+                "initialHiddenState",
+                "resetAfter",
+                "returnSequence",
+                "direction",
+                "layout",
+                "activations"
             ],
             "MLInstanceNormOptions": [
                 "scale",
@@ -1461,12 +1467,14 @@
                 "axes",
                 "keepDimensions"
             ],
-            "MLResampleOptions": [
+            "MLResample2dOptions": [
                 "mode",
                 "scalesCount",
                 "scales",
                 "sizesCount",
-                "sizes"
+                "sizes",
+                "axesCount",
+                "axes"
             ],
             "MLSliceOptions": [
                 "axesCount",
@@ -1482,16 +1490,6 @@
             "MLTransposeOptions": [
                 "permutationCount",
                 "permutation"
-            ],
-            "MLGruOptions": [
-                "bias",
-                "recurrentBias",
-                "initialHiddenState",
-                "resetAfter",
-                "returnSequence",
-                "direction",
-                "layout",
-                "activations"
             ],
             "MLInput": [
                 "resource",
