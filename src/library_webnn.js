@@ -403,8 +403,8 @@ var LibraryWebNN = {
             {{{ makeGetValue('ptr', C_STRUCTS.MLResample2dOptions.sizes, '*') }}}
         ),
         "axes": WebNN.makeI32Array(
-          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResample2dOptions.axesCount) }}},
-          {{{ makeGetValue('ptr', C_STRUCTS.MLResample2dOptions.axes, '*') }}}
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResample2dOptions.axesCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLResample2dOptions.axes, '*') }}}
         ),
       };
     },
