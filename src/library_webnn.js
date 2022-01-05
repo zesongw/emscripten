@@ -389,18 +389,22 @@ var LibraryWebNN = {
       };
     },
 
-    makeResampleOptions: function(ptr) {
+    makeResample2dOptions: function(ptr) {
       return {
         "mode": WebNN.InterpolationMode[
-          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLResampleOptions.mode) }}}
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLResample2dOptions.mode) }}}
         ],
         "scales": WebNN.makeF32Array(
-            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResampleOptions.scalesCount) }}},
-            {{{ makeGetValue('ptr', C_STRUCTS.MLResampleOptions.scales, '*') }}}
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResample2dOptions.scalesCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLResample2dOptions.scales, '*') }}}
         ),
         "sizes": WebNN.makeI32Array(
-            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResampleOptions.sizesCount) }}},
-            {{{ makeGetValue('ptr', C_STRUCTS.MLResampleOptions.sizes, '*') }}}
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResample2dOptions.sizesCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLResample2dOptions.sizes, '*') }}}
+        ),
+        "axes": WebNN.makeI32Array(
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLResample2dOptions.axesCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLResample2dOptions.axes, '*') }}}
         ),
       };
     },
@@ -612,11 +616,11 @@ var LibraryWebNN = {
     return WebNN.mgrOperator.create(output);
   },
 
-  mlGraphBuilderResample: function(builderId, inputId, optionsPtr) {
+  mlGraphBuilderResample2d: function(builderId, inputId, optionsPtr) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var input = WebNN.mgrOperand.get(inputId);
-    var options = WebNN.makeResampleOptions(optionsPtr);
-    var output = builder["resample"](input, options);
+    var options = WebNN.makeResample2dOptions(optionsPtr);
+    var output = builder["resample2d"](input, options);
     return WebNN.mgrOperand.create(output);
   },
 
