@@ -231,15 +231,27 @@ namespace ml {
     static_assert(offsetof(GemmOptions, bTranspose) == offsetof(MLGemmOptions, bTranspose),
             "offsetof mismatch for GemmOptions::bTranspose");
 
-    // GruOperators
+    // GruOptions
 
-    static_assert(sizeof(GruOperators) == sizeof(MLGruOperators), "sizeof mismatch for GruOperators");
-    static_assert(alignof(GruOperators) == alignof(MLGruOperators), "alignof mismatch for GruOperators");
+    static_assert(sizeof(GruOptions) == sizeof(MLGruOptions), "sizeof mismatch for GruOptions");
+    static_assert(alignof(GruOptions) == alignof(MLGruOptions), "alignof mismatch for GruOptions");
 
-    static_assert(offsetof(GruOperators, resetGateActivation) == offsetof(MLGruOperators, resetGateActivation),
-            "offsetof mismatch for GruOperators::resetGateActivation");
-    static_assert(offsetof(GruOperators, newGateActivation) == offsetof(MLGruOperators, newGateActivation),
-            "offsetof mismatch for GruOperators::newGateActivation");
+    static_assert(offsetof(GruOptions, bias) == offsetof(MLGruOptions, bias),
+            "offsetof mismatch for GruOptions::bias");
+    static_assert(offsetof(GruOptions, recurrentBias) == offsetof(MLGruOptions, recurrentBias),
+            "offsetof mismatch for GruOptions::recurrentBias");
+    static_assert(offsetof(GruOptions, initialHiddenState) == offsetof(MLGruOptions, initialHiddenState),
+            "offsetof mismatch for GruOptions::initialHiddenState");
+    static_assert(offsetof(GruOptions, resetAfter) == offsetof(MLGruOptions, resetAfter),
+            "offsetof mismatch for GruOptions::resetAfter");
+    static_assert(offsetof(GruOptions, returnSequence) == offsetof(MLGruOptions, returnSequence),
+            "offsetof mismatch for GruOptions::returnSequence");
+    static_assert(offsetof(GruOptions, direction) == offsetof(MLGruOptions, direction),
+            "offsetof mismatch for GruOptions::direction");
+    static_assert(offsetof(GruOptions, layout) == offsetof(MLGruOptions, layout),
+            "offsetof mismatch for GruOptions::layout");
+    static_assert(offsetof(GruOptions, activations) == offsetof(MLGruOptions, activations),
+            "offsetof mismatch for GruOptions::activations");
 
     // InstanceNormOptions
 
@@ -323,21 +335,25 @@ namespace ml {
     static_assert(offsetof(ReduceOptions, keepDimensions) == offsetof(MLReduceOptions, keepDimensions),
             "offsetof mismatch for ReduceOptions::keepDimensions");
 
-    // ResampleOptions
+    // Resample2dOptions
 
-    static_assert(sizeof(ResampleOptions) == sizeof(MLResampleOptions), "sizeof mismatch for ResampleOptions");
-    static_assert(alignof(ResampleOptions) == alignof(MLResampleOptions), "alignof mismatch for ResampleOptions");
+    static_assert(sizeof(Resample2dOptions) == sizeof(MLResample2dOptions), "sizeof mismatch for Resample2dOptions");
+    static_assert(alignof(Resample2dOptions) == alignof(MLResample2dOptions), "alignof mismatch for Resample2dOptions");
 
-    static_assert(offsetof(ResampleOptions, mode) == offsetof(MLResampleOptions, mode),
-            "offsetof mismatch for ResampleOptions::mode");
-    static_assert(offsetof(ResampleOptions, scalesCount) == offsetof(MLResampleOptions, scalesCount),
-            "offsetof mismatch for ResampleOptions::scalesCount");
-    static_assert(offsetof(ResampleOptions, scales) == offsetof(MLResampleOptions, scales),
-            "offsetof mismatch for ResampleOptions::scales");
-    static_assert(offsetof(ResampleOptions, sizesCount) == offsetof(MLResampleOptions, sizesCount),
-            "offsetof mismatch for ResampleOptions::sizesCount");
-    static_assert(offsetof(ResampleOptions, sizes) == offsetof(MLResampleOptions, sizes),
-            "offsetof mismatch for ResampleOptions::sizes");
+    static_assert(offsetof(Resample2dOptions, mode) == offsetof(MLResample2dOptions, mode),
+            "offsetof mismatch for Resample2dOptions::mode");
+    static_assert(offsetof(Resample2dOptions, scalesCount) == offsetof(MLResample2dOptions, scalesCount),
+            "offsetof mismatch for Resample2dOptions::scalesCount");
+    static_assert(offsetof(Resample2dOptions, scales) == offsetof(MLResample2dOptions, scales),
+            "offsetof mismatch for Resample2dOptions::scales");
+    static_assert(offsetof(Resample2dOptions, sizesCount) == offsetof(MLResample2dOptions, sizesCount),
+            "offsetof mismatch for Resample2dOptions::sizesCount");
+    static_assert(offsetof(Resample2dOptions, sizes) == offsetof(MLResample2dOptions, sizes),
+            "offsetof mismatch for Resample2dOptions::sizes");
+    static_assert(offsetof(Resample2dOptions, axesCount) == offsetof(MLResample2dOptions, axesCount),
+            "offsetof mismatch for Resample2dOptions::axesCount");
+    static_assert(offsetof(Resample2dOptions, axes) == offsetof(MLResample2dOptions, axes),
+            "offsetof mismatch for Resample2dOptions::axes");
 
     // SliceOptions
 
@@ -376,28 +392,6 @@ namespace ml {
             "offsetof mismatch for TransposeOptions::permutationCount");
     static_assert(offsetof(TransposeOptions, permutation) == offsetof(MLTransposeOptions, permutation),
             "offsetof mismatch for TransposeOptions::permutation");
-
-    // GruOptions
-
-    static_assert(sizeof(GruOptions) == sizeof(MLGruOptions), "sizeof mismatch for GruOptions");
-    static_assert(alignof(GruOptions) == alignof(MLGruOptions), "alignof mismatch for GruOptions");
-
-    static_assert(offsetof(GruOptions, bias) == offsetof(MLGruOptions, bias),
-            "offsetof mismatch for GruOptions::bias");
-    static_assert(offsetof(GruOptions, recurrentBias) == offsetof(MLGruOptions, recurrentBias),
-            "offsetof mismatch for GruOptions::recurrentBias");
-    static_assert(offsetof(GruOptions, initialHiddenState) == offsetof(MLGruOptions, initialHiddenState),
-            "offsetof mismatch for GruOptions::initialHiddenState");
-    static_assert(offsetof(GruOptions, resetAfter) == offsetof(MLGruOptions, resetAfter),
-            "offsetof mismatch for GruOptions::resetAfter");
-    static_assert(offsetof(GruOptions, returnSequence) == offsetof(MLGruOptions, returnSequence),
-            "offsetof mismatch for GruOptions::returnSequence");
-    static_assert(offsetof(GruOptions, direction) == offsetof(MLGruOptions, direction),
-            "offsetof mismatch for GruOptions::direction");
-    static_assert(offsetof(GruOptions, layout) == offsetof(MLGruOptions, layout),
-            "offsetof mismatch for GruOptions::layout");
-    static_assert(offsetof(GruOptions, activations) == offsetof(MLGruOptions, activations),
-            "offsetof mismatch for GruOptions::activations");
 
     // Input
 
@@ -462,6 +456,10 @@ namespace ml {
     static_assert(sizeof(GraphBuilder) == sizeof(MLGraphBuilder), "sizeof mismatch for GraphBuilder");
     static_assert(alignof(GraphBuilder) == alignof(MLGraphBuilder), "alignof mismatch for GraphBuilder");
 
+    Operand GraphBuilder::Abs(Operand const& input) const {
+        auto result = mlGraphBuilderAbs(GetHandle(), input.GetHandle());
+        return Operand::Acquire(result);
+    }
     Operand GraphBuilder::Add(Operand const& a, Operand const& b) const {
         auto result = mlGraphBuilderAdd(GetHandle(), a.GetHandle(), b.GetHandle());
         return Operand::Acquire(result);
@@ -477,6 +475,10 @@ namespace ml {
     Graph GraphBuilder::Build(NamedOperands const& namedOperands) const {
         auto result = mlGraphBuilderBuild(GetHandle(), namedOperands.GetHandle());
         return Graph::Acquire(result);
+    }
+    Operand GraphBuilder::Ceil(Operand const& input) const {
+        auto result = mlGraphBuilderCeil(GetHandle(), input.GetHandle());
+        return Operand::Acquire(result);
     }
     Operand GraphBuilder::Clamp(Operand const& input, ClampOptions const * options) const {
         auto result = mlGraphBuilderClamp(GetHandle(), input.GetHandle(), reinterpret_cast<MLClampOptions const * >(options));
@@ -498,8 +500,20 @@ namespace ml {
         auto result = mlGraphBuilderConv2d(GetHandle(), input.GetHandle(), filter.GetHandle(), reinterpret_cast<MLConv2dOptions const * >(options));
         return Operand::Acquire(result);
     }
+    Operand GraphBuilder::Cos(Operand const& input) const {
+        auto result = mlGraphBuilderCos(GetHandle(), input.GetHandle());
+        return Operand::Acquire(result);
+    }
     Operand GraphBuilder::Div(Operand const& a, Operand const& b) const {
         auto result = mlGraphBuilderDiv(GetHandle(), a.GetHandle(), b.GetHandle());
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::Exp(Operand const& input) const {
+        auto result = mlGraphBuilderExp(GetHandle(), input.GetHandle());
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::Floor(Operand const& input) const {
+        auto result = mlGraphBuilderFloor(GetHandle(), input.GetHandle());
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::Gemm(Operand const& a, Operand const& b, GemmOptions const * options) const {
@@ -526,6 +540,10 @@ namespace ml {
         auto result = mlGraphBuilderInstanceNorm(GetHandle(), input.GetHandle(), reinterpret_cast<MLInstanceNormOptions const * >(options));
         return Operand::Acquire(result);
     }
+    Operand GraphBuilder::L2Pool2d(Operand const& input, Pool2dOptions const * options) const {
+        auto result = mlGraphBuilderL2Pool2d(GetHandle(), input.GetHandle(), reinterpret_cast<MLPool2dOptions const * >(options));
+        return Operand::Acquire(result);
+    }
     Operand GraphBuilder::LeakyRelu(Operand const& input, LeakyReluOptions const * options) const {
         auto result = mlGraphBuilderLeakyRelu(GetHandle(), input.GetHandle(), reinterpret_cast<MLLeakyReluOptions const * >(options));
         return Operand::Acquire(result);
@@ -533,6 +551,10 @@ namespace ml {
     Operator GraphBuilder::LeakyReluOperator(LeakyReluOptions const * options) const {
         auto result = mlGraphBuilderLeakyReluOperator(GetHandle(), reinterpret_cast<MLLeakyReluOptions const * >(options));
         return Operator::Acquire(result);
+    }
+    Operand GraphBuilder::Log(Operand const& input) const {
+        auto result = mlGraphBuilderLog(GetHandle(), input.GetHandle());
+        return Operand::Acquire(result);
     }
     Operand GraphBuilder::Matmul(Operand const& a, Operand const& b) const {
         auto result = mlGraphBuilderMatmul(GetHandle(), a.GetHandle(), b.GetHandle());
@@ -552,6 +574,10 @@ namespace ml {
     }
     Operand GraphBuilder::Mul(Operand const& a, Operand const& b) const {
         auto result = mlGraphBuilderMul(GetHandle(), a.GetHandle(), b.GetHandle());
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::Neg(Operand const& input) const {
+        auto result = mlGraphBuilderNeg(GetHandle(), input.GetHandle());
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::Pad(Operand const& input, Operand const& padding, PadOptions const * options) const {
@@ -598,8 +624,8 @@ namespace ml {
         auto result = mlGraphBuilderReluOperator(GetHandle());
         return Operator::Acquire(result);
     }
-    Operand GraphBuilder::Resample(Operand const& input, ResampleOptions const * options) const {
-        auto result = mlGraphBuilderResample(GetHandle(), input.GetHandle(), reinterpret_cast<MLResampleOptions const * >(options));
+    Operand GraphBuilder::Resample2d(Operand const& input, Resample2dOptions const * options) const {
+        auto result = mlGraphBuilderResample2d(GetHandle(), input.GetHandle(), reinterpret_cast<MLResample2dOptions const * >(options));
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::Reshape(Operand const& input, int32_t const * newShape, uint32_t newShapeCount) const {
@@ -613,6 +639,10 @@ namespace ml {
     Operator GraphBuilder::SigmoidOperator() const {
         auto result = mlGraphBuilderSigmoidOperator(GetHandle());
         return Operator::Acquire(result);
+    }
+    Operand GraphBuilder::Sin(Operand const& input) const {
+        auto result = mlGraphBuilderSin(GetHandle(), input.GetHandle());
+        return Operand::Acquire(result);
     }
     Operand GraphBuilder::Slice(Operand const& input, int32_t const * starts, uint32_t startsCount, int32_t const * sizes, uint32_t sizesCount, SliceOptions const * options) const {
         auto result = mlGraphBuilderSlice(GetHandle(), input.GetHandle(), reinterpret_cast<int32_t const * >(starts), startsCount, reinterpret_cast<int32_t const * >(sizes), sizesCount, reinterpret_cast<MLSliceOptions const * >(options));
@@ -632,6 +662,10 @@ namespace ml {
     }
     Operand GraphBuilder::Sub(Operand const& a, Operand const& b) const {
         auto result = mlGraphBuilderSub(GetHandle(), a.GetHandle(), b.GetHandle());
+        return Operand::Acquire(result);
+    }
+    Operand GraphBuilder::Tan(Operand const& input) const {
+        auto result = mlGraphBuilderTan(GetHandle(), input.GetHandle());
         return Operand::Acquire(result);
     }
     Operand GraphBuilder::Tanh(Operand const& input) const {
@@ -770,6 +804,33 @@ namespace ml {
         }
     }
 
+    // OperatorArray
+
+    static_assert(sizeof(OperatorArray) == sizeof(MLOperatorArray), "sizeof mismatch for OperatorArray");
+    static_assert(alignof(OperatorArray) == alignof(MLOperatorArray), "alignof mismatch for OperatorArray");
+
+    Operator OperatorArray::Get(size_t index) const {
+        auto result = mlOperatorArrayGet(GetHandle(), index);
+        return Operator::Acquire(result);
+    }
+    void OperatorArray::Set(Operator const& mlOperator) const {
+        mlOperatorArraySet(GetHandle(), mlOperator.GetHandle());
+    }
+    size_t OperatorArray::Size() const {
+        auto result = mlOperatorArraySize(GetHandle());
+        return result;
+    }
+    void OperatorArray::WebnnReference(MLOperatorArray handle) {
+        if (handle != nullptr) {
+            mlOperatorArrayReference(handle);
+        }
+    }
+    void OperatorArray::WebnnRelease(MLOperatorArray handle) {
+        if (handle != nullptr) {
+            mlOperatorArrayRelease(handle);
+        }
+    }
+
     GraphBuilder CreateGraphBuilder(Context context) {
         return GraphBuilder::Acquire(webnnCreateGraphBuilder(context.GetHandle()));
     }
@@ -784,6 +845,10 @@ namespace ml {
 
     NamedOutputs CreateNamedOutputs() {
         return NamedOutputs::Acquire(webnnCreateNamedOutputs());
+    }
+
+    OperatorArray CreateOperatorArray() {
+        return OperatorArray::Acquire(webnnCreateOperatorArray());
     }
 
 }
