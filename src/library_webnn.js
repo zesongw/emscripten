@@ -120,7 +120,9 @@ var LibraryWebNN = {
       {{{ webnn.makeInitManager('NamedOutputs') }}}
       {{{ webnn.makeInitManager('NamedOperands') }}}
       {{{ webnn.makeInitManager('Operand') }}}
+      {{{ webnn.makeInitManager('OperandArray') }}}
       {{{ webnn.makeInitManager('Operator') }}}
+      {{{ webnn.makeInitManager('OperatorArray') }}}
     },
 
     AutoPad: [
@@ -205,6 +207,17 @@ var LibraryWebNN = {
       return array;
     },
 
+    makeU32Array: function(count, arrayPtr) {
+      if (count === 0 || arrayPtr === 0) {
+        return undefined;
+      }
+      var array = [];
+      for (var i = 0; i < count; ++i, arrayPtr += 4) {
+        array.push({{{ webnn.makeGetU32('arrayPtr', 0) }}});
+      }
+      return array;
+    },
+
     makeF32Array: function(count, arrayPtr) {
       if (count === 0 || arrayPtr === 0) {
         return undefined;
@@ -249,6 +262,23 @@ var LibraryWebNN = {
         "beta": {{{ webnn.makeGetF32('ptr', C_STRUCTS.MLGemmOptions.beta) }}},
         "aTranspose": {{{ webnn.makeGetBool('ptr', C_STRUCTS.MLGemmOptions.aTranspose)}}},
         "bTranspose": {{{ webnn.makeGetBool('ptr', C_STRUCTS.MLGemmOptions.bTranspose)}}},
+      };
+    },
+
+    makeGruOptions: function(ptr) {
+      return {
+        "bias": WebNN.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLGruOptions.bias, '*') }}}),
+        "recurrentBias": WebNN.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLGruOptions.recurrentBias, '*') }}}),
+        "initialHiddenState": WebNN.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLGruOptions.initialHiddenState, '*') }}}),
+        "resetAfter": {{{ webnn.makeGetBool('ptr', C_STRUCTS.MLGruOptions.resetAfter)}}},
+        "returnSequence": {{{ webnn.makeGetBool('ptr', C_STRUCTS.MLGruOptions.returnSequence)}}},
+        "direction": WebNN.RecurrentNetworkDirection[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLGruOptions.direction) }}}
+        ],
+        "layout": WebNN.RecurrentNetworkWeightLayout[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLGruOptions.layout) }}}
+        ],
+        "activations": WebNN.mgrOperatorArray.get({{{ makeGetValue('ptr', C_STRUCTS.MLGruOptions.activations, '*') }}}),
       };
     },
 
@@ -330,6 +360,12 @@ var LibraryWebNN = {
       };
     },
 
+    makeSplitOptions: function(ptr) {
+      return {
+        "axis": {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLSplitOptions.axis) }}},
+      };
+    },
+
     makeInput: function(ptr) {
       if ({{{ makeGetValue('ptr', C_STRUCTS.MLInput.dimensions, '*') }}} === 0) {
         return WebNN.makeArrayBufferView(ptr + {{{ C_STRUCTS.MLInput.resource }}});
@@ -384,7 +420,9 @@ var LibraryWebNN = {
   {{{ webnn.makeReferenceRelease('NamedOperands') }}}
   {{{ webnn.makeReferenceRelease('NamedOutputs') }}}
   {{{ webnn.makeReferenceRelease('Operand') }}}
+  {{{ webnn.makeReferenceRelease('OperandArray') }}}
   {{{ webnn.makeReferenceRelease('Operator') }}}
+  {{{ webnn.makeReferenceRelease('OperatorArray') }}}
 
   // Methods of GraphBuilder
   mlGraphBuilderAdd: function(builderId, aId, bId) {
@@ -490,6 +528,17 @@ var LibraryWebNN = {
     return WebNN.mgrOperand.create(output);
   },
 
+  mlGraphBuilderGru: function(builderId, inputId, weightId, recurrentWeightId,
+      steps, hiddenSize, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var weight = WebNN.mgrOperand.get(weightId);
+    var recurrentWeight = WebNN.mgrOperand.get(recurrentWeightId);
+    var options = WebNN.makeGruOptions(optionsPtr);
+    var gru = builder["gru"](input, weight, recurrentWeight, steps, hiddenSize, options);
+    return WebNN.mgrOperandArray.create(gru);
+  },
+
   mlGraphBuilderInput: function(builderId, namePtr, descPtr) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var name = UTF8ToString(namePtr);
@@ -566,11 +615,34 @@ var LibraryWebNN = {
     return WebNN.mgrOperand.create(output);
   },
 
+  mlGraphBuilderSigmoid: function(builderId, inputId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var output = builder["sigmoid"](input);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderSigmoidOperator: function(builderId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var output = builder["sigmoid"]();
+    return WebNN.mgrOperator.create(output);
+  },
+
   mlGraphBuilderSoftmax: function(builderId, inputId) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var input = WebNN.mgrOperand.get(inputId);
     var output = builder["softmax"](input);
     return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderSplit: function(builderId, inputId, splitsPtr, splitsCount, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var splits = WebNN.makeU32Array(splitsCount, splitsPtr);
+    if (splitsCount == 1) splits = splits[0];
+    var options = WebNN.makeSplitOptions(optionsPtr);
+    var output = builder["split"](input, splits, options);
+    return WebNN.mgrOperandArray.create(output);
   },
 
   mlGraphBuilderSub: function(builderId, aId, bId) {
@@ -581,12 +653,58 @@ var LibraryWebNN = {
     return WebNN.mgrOperand.create(c);
   },
 
+  mlGraphBuilderTanh: function(builderId, inputId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var output = builder["tanh"](input);
+    return WebNN.mgrOperand.create(output);
+  },
+
+  mlGraphBuilderTanhOperator: function(builderId) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var output = builder["tanh"]();
+    return WebNN.mgrOperator.create(output);
+  },
+
   mlGraphBuilderTranspose: function(builderId, inputId, optionsPtr) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var input = WebNN.mgrOperand.get(inputId);
     var options = WebNN.makeTransposeOptions(optionsPtr);
     var output = builder["transpose"](input, options);
     return WebNN.mgrOperand.create(output);
+  },
+
+  mlOperandArrayGet: function(operandArrayId, indexId) {
+    var operandArray = WebNN.mgrOperandArray.get(operandArrayId);
+    var operand = operandArray[indexId];
+    return WebNN.mgrOperand.create(operand);
+  },
+
+  mlOperandArraySize: function(operandArrayId) {
+    var operandArray = WebNN.mgrOperandArray.get(operandArrayId);
+    return operandArray.length;
+  },
+
+  mlOperatorArrayGet: function(operatorArrayId, indexId) {
+    var operatorArray = WebNN.mgrOperatorArray.get(operatorArrayId);
+    var operator = operatorArray[indexId];
+    return WebNN.mgrOperator.create(operator);
+  },
+
+  mlOperatorArraySet: function(operatorArrayId, mlOperatorId) {
+    var operatorArray = WebNN.mgrOperatorArray.get(operatorArrayId);
+    var mlOperator = WebNN.mgrOperator.get(mlOperatorId);
+    operatorArray.push(mlOperator);
+  },
+
+  mlOperatorArraySize: function(operatorArrayId) {
+    var operatorArray = WebNN.mgrOperatorArray.get(operatorArrayId);
+    return operatorArray.length;
+  },
+
+  webnnCreateOperatorArray: function() {
+    var operatorArray = [];
+    return WebNN.mgrOperatorArray.create(operatorArray);
   },
 
   webnnCreateNamedInputs: function() {
