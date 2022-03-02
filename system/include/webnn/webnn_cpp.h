@@ -14,11 +14,32 @@ namespace ml {
         SameLower = 0x00000002,
     };
 
+    enum class BackendType : uint32_t {
+        Null = 0x00000000,
+        DirectML = 0x00000001,
+        OpenVINO = 0x00000002,
+        OneDNN = 0x00000003,
+        MLAS = 0x00000004,
+    };
+
     enum class ComputeGraphStatus : uint32_t {
         Success = 0x00000000,
         Error = 0x00000001,
         ContextLost = 0x00000002,
         Unknown = 0x00000003,
+    };
+
+    enum class ConvTranspose2dFilterOperandLayout : uint32_t {
+        Iohw = 0x00000000,
+        Hwoi = 0x00000001,
+        Ohwi = 0x00000002,
+    };
+
+    enum class Conv2dFilterOperandLayout : uint32_t {
+        Oihw = 0x00000000,
+        Hwio = 0x00000001,
+        Ohwi = 0x00000002,
+        Ihwo = 0x00000003,
     };
 
     enum class DevicePreference : uint32_t {
@@ -39,13 +60,6 @@ namespace ml {
         OutOfMemory = 0x00000002,
         Unknown = 0x00000003,
         DeviceLost = 0x00000004,
-    };
-
-    enum class FilterOperandLayout : uint32_t {
-        Oihw = 0x00000000,
-        Hwio = 0x00000001,
-        Ohwi = 0x00000002,
-        Ihwo = 0x00000003,
     };
 
     enum class InputOperandLayout : uint32_t {
@@ -91,6 +105,11 @@ namespace ml {
         Rzn = 0x00000001,
     };
 
+    enum class RoundingType : uint32_t {
+        Floor = 0x00000000,
+        Ceil = 0x00000001,
+    };
+
 
 
 
@@ -98,23 +117,26 @@ namespace ml {
     using ErrorCallback = MLErrorCallback;
 
     class Context;
+    class FusionOperator;
     class Graph;
     class GraphBuilder;
+    class Instance;
     class NamedInputs;
     class NamedOperands;
     class NamedOutputs;
     class Operand;
     class OperandArray;
-    class Operator;
     class OperatorArray;
 
     struct ArrayBufferView;
     struct BatchNormOptions;
     struct ClampOptions;
     struct ContextOptions;
+    struct ConvTranspose2dOptions;
     struct Conv2dOptions;
     struct GemmOptions;
     struct GruOptions;
+    struct InstanceDescriptor;
     struct InstanceNormOptions;
     struct LeakyReluOptions;
     struct OperandDescriptor;
@@ -220,6 +242,18 @@ namespace ml {
         static void WebnnRelease(MLContext handle);
     };
 
+    class FusionOperator : public ObjectBase<FusionOperator, MLFusionOperator> {
+      public:
+        using ObjectBase::ObjectBase;
+        using ObjectBase::operator=;
+
+
+      private:
+        friend ObjectBase<FusionOperator, MLFusionOperator>;
+        static void WebnnReference(MLFusionOperator handle);
+        static void WebnnRelease(MLFusionOperator handle);
+    };
+
     class Graph : public ObjectBase<Graph, MLGraph> {
       public:
         using ObjectBase::ObjectBase;
@@ -245,9 +279,10 @@ namespace ml {
         Graph Build(NamedOperands const& namedOperands) const;
         Operand Ceil(Operand const& input) const;
         Operand Clamp(Operand const& input, ClampOptions const * options = nullptr) const;
-        Operator ClampOperator(ClampOptions const * options = nullptr) const;
+        FusionOperator ClampOperator(ClampOptions const * options = nullptr) const;
         Operand Concat(uint32_t inputsCount, Operand const * inputs, uint32_t axis) const;
         Operand Constant(OperandDescriptor const * desc, ArrayBufferView const * value) const;
+        Operand ConvTranspose2d(Operand const& input, Operand const& filter, ConvTranspose2dOptions const * options = nullptr) const;
         Operand Conv2d(Operand const& input, Operand const& filter, Conv2dOptions const * options = nullptr) const;
         Operand Cos(Operand const& input) const;
         Operand Div(Operand const& a, Operand const& b) const;
@@ -256,12 +291,12 @@ namespace ml {
         Operand Gemm(Operand const& a, Operand const& b, GemmOptions const * options = nullptr) const;
         OperandArray Gru(Operand const& input, Operand const& weight, Operand const& recurrentWeight, int32_t steps, int32_t hiddenSize, GruOptions const * options = nullptr) const;
         Operand HardSwish(Operand const& input) const;
-        Operator HardSwishOperator() const;
+        FusionOperator HardSwishOperator() const;
         Operand Input(char const * name, OperandDescriptor const * desc) const;
         Operand InstanceNorm(Operand const& input, InstanceNormOptions const * options = nullptr) const;
         Operand L2Pool2d(Operand const& input, Pool2dOptions const * options = nullptr) const;
         Operand LeakyRelu(Operand const& input, LeakyReluOptions const * options = nullptr) const;
-        Operator LeakyReluOperator(LeakyReluOptions const * options = nullptr) const;
+        FusionOperator LeakyReluOperator(LeakyReluOptions const * options = nullptr) const;
         Operand Log(Operand const& input) const;
         Operand Matmul(Operand const& a, Operand const& b) const;
         Operand Max(Operand const& a, Operand const& b) const;
@@ -279,11 +314,11 @@ namespace ml {
         Operand ReduceProduct(Operand const& input, ReduceOptions const * options = nullptr) const;
         Operand ReduceSum(Operand const& input, ReduceOptions const * options = nullptr) const;
         Operand Relu(Operand const& input) const;
-        Operator ReluOperator() const;
+        FusionOperator ReluOperator() const;
         Operand Resample2d(Operand const& input, Resample2dOptions const * options = nullptr) const;
         Operand Reshape(Operand const& input, int32_t const * newShape, uint32_t newShapeCount) const;
         Operand Sigmoid(Operand const& input) const;
-        Operator SigmoidOperator() const;
+        FusionOperator SigmoidOperator() const;
         Operand Sin(Operand const& input) const;
         Operand Slice(Operand const& input, int32_t const * starts, uint32_t startsCount, int32_t const * sizes, uint32_t sizesCount, SliceOptions const * options = nullptr) const;
         Operand Softmax(Operand const& input) const;
@@ -292,13 +327,26 @@ namespace ml {
         Operand Sub(Operand const& a, Operand const& b) const;
         Operand Tan(Operand const& input) const;
         Operand Tanh(Operand const& input) const;
-        Operator TanhOperator() const;
+        FusionOperator TanhOperator() const;
         Operand Transpose(Operand const& input, TransposeOptions const * options = nullptr) const;
 
       private:
         friend ObjectBase<GraphBuilder, MLGraphBuilder>;
         static void WebnnReference(MLGraphBuilder handle);
         static void WebnnRelease(MLGraphBuilder handle);
+    };
+
+    class Instance : public ObjectBase<Instance, MLInstance> {
+      public:
+        using ObjectBase::ObjectBase;
+        using ObjectBase::operator=;
+
+        Context CreateContext(ContextOptions const * options = nullptr) const;
+
+      private:
+        friend ObjectBase<Instance, MLInstance>;
+        static void WebnnReference(MLInstance handle);
+        static void WebnnRelease(MLInstance handle);
     };
 
     class NamedInputs : public ObjectBase<NamedInputs, MLNamedInputs> {
@@ -366,25 +414,13 @@ namespace ml {
         static void WebnnRelease(MLOperandArray handle);
     };
 
-    class Operator : public ObjectBase<Operator, MLOperator> {
-      public:
-        using ObjectBase::ObjectBase;
-        using ObjectBase::operator=;
-
-
-      private:
-        friend ObjectBase<Operator, MLOperator>;
-        static void WebnnReference(MLOperator handle);
-        static void WebnnRelease(MLOperator handle);
-    };
-
     class OperatorArray : public ObjectBase<OperatorArray, MLOperatorArray> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
-        Operator Get(size_t index) const;
-        void Set(Operator const& mlOperator) const;
+        FusionOperator Get(size_t index) const;
+        void Set(FusionOperator const& mlOperator) const;
         size_t Size() const;
 
       private:
@@ -410,7 +446,7 @@ namespace ml {
         Operand bias;
         uint32_t axis = 1;
         float epsilon = 1e-05;
-        Operator activation;
+        FusionOperator activation;
     };
 
     struct ClampOptions {
@@ -423,7 +459,7 @@ namespace ml {
         PowerPreference powerPreference = PowerPreference::Default;
     };
 
-    struct Conv2dOptions {
+    struct ConvTranspose2dOptions {
         uint32_t paddingCount = 0;
         int32_t const * padding = nullptr;
         uint32_t stridesCount = 0;
@@ -435,12 +471,26 @@ namespace ml {
         uint32_t outputSizesCount = 0;
         int32_t const * outputSizes = nullptr;
         AutoPad autoPad = AutoPad::Explicit;
-        bool transpose = false;
         int32_t groups = 1;
         InputOperandLayout inputLayout = InputOperandLayout::Nchw;
-        FilterOperandLayout filterLayout = FilterOperandLayout::Oihw;
+        ConvTranspose2dFilterOperandLayout filterLayout = ConvTranspose2dFilterOperandLayout::Iohw;
         Operand bias;
-        Operator activation;
+        FusionOperator activation;
+    };
+
+    struct Conv2dOptions {
+        uint32_t paddingCount = 0;
+        int32_t const * padding = nullptr;
+        uint32_t stridesCount = 0;
+        int32_t const * strides = nullptr;
+        uint32_t dilationsCount = 0;
+        int32_t const * dilations = nullptr;
+        AutoPad autoPad = AutoPad::Explicit;
+        int32_t groups = 1;
+        InputOperandLayout inputLayout = InputOperandLayout::Nchw;
+        Conv2dFilterOperandLayout filterLayout = Conv2dFilterOperandLayout::Oihw;
+        Operand bias;
+        FusionOperator activation;
     };
 
     struct GemmOptions {
@@ -460,6 +510,9 @@ namespace ml {
         RecurrentNetworkDirection direction = RecurrentNetworkDirection::Forward;
         RecurrentNetworkWeightLayout layout = RecurrentNetworkWeightLayout::Zrn;
         OperatorArray activations;
+    };
+
+    struct InstanceDescriptor {
     };
 
     struct InstanceNormOptions {
@@ -495,6 +548,9 @@ namespace ml {
         int32_t const * dilations = nullptr;
         AutoPad autoPad = AutoPad::Explicit;
         InputOperandLayout layout = InputOperandLayout::Nchw;
+        RoundingType roundingType = RoundingType::Floor;
+        uint32_t outputSizesCount = 0;
+        int32_t const * outputSizes = nullptr;
     };
 
     struct ReduceOptions {

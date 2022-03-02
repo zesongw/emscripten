@@ -38,14 +38,15 @@
 typedef uint32_t WEBNNFlags;
 
 typedef struct MLContextImpl* MLContext;
+typedef struct MLFusionOperatorImpl* MLFusionOperator;
 typedef struct MLGraphImpl* MLGraph;
 typedef struct MLGraphBuilderImpl* MLGraphBuilder;
+typedef struct MLInstanceImpl* MLInstance;
 typedef struct MLNamedInputsImpl* MLNamedInputs;
 typedef struct MLNamedOperandsImpl* MLNamedOperands;
 typedef struct MLNamedOutputsImpl* MLNamedOutputs;
 typedef struct MLOperandImpl* MLOperand;
 typedef struct MLOperandArrayImpl* MLOperandArray;
-typedef struct MLOperatorImpl* MLOperator;
 typedef struct MLOperatorArrayImpl* MLOperatorArray;
 
 typedef enum MLAutoPad {
@@ -55,6 +56,15 @@ typedef enum MLAutoPad {
     MLAutoPad_Force32 = 0x7FFFFFFF
 } MLAutoPad;
 
+typedef enum MLBackendType {
+    MLBackendType_Null = 0x00000000,
+    MLBackendType_DirectML = 0x00000001,
+    MLBackendType_OpenVINO = 0x00000002,
+    MLBackendType_OneDNN = 0x00000003,
+    MLBackendType_MLAS = 0x00000004,
+    MLBackendType_Force32 = 0x7FFFFFFF
+} MLBackendType;
+
 typedef enum MLComputeGraphStatus {
     MLComputeGraphStatus_Success = 0x00000000,
     MLComputeGraphStatus_Error = 0x00000001,
@@ -62,6 +72,21 @@ typedef enum MLComputeGraphStatus {
     MLComputeGraphStatus_Unknown = 0x00000003,
     MLComputeGraphStatus_Force32 = 0x7FFFFFFF
 } MLComputeGraphStatus;
+
+typedef enum MLConvTranspose2dFilterOperandLayout {
+    MLConvTranspose2dFilterOperandLayout_Iohw = 0x00000000,
+    MLConvTranspose2dFilterOperandLayout_Hwoi = 0x00000001,
+    MLConvTranspose2dFilterOperandLayout_Ohwi = 0x00000002,
+    MLConvTranspose2dFilterOperandLayout_Force32 = 0x7FFFFFFF
+} MLConvTranspose2dFilterOperandLayout;
+
+typedef enum MLConv2dFilterOperandLayout {
+    MLConv2dFilterOperandLayout_Oihw = 0x00000000,
+    MLConv2dFilterOperandLayout_Hwio = 0x00000001,
+    MLConv2dFilterOperandLayout_Ohwi = 0x00000002,
+    MLConv2dFilterOperandLayout_Ihwo = 0x00000003,
+    MLConv2dFilterOperandLayout_Force32 = 0x7FFFFFFF
+} MLConv2dFilterOperandLayout;
 
 typedef enum MLDevicePreference {
     MLDevicePreference_Default = 0x00000000,
@@ -85,14 +110,6 @@ typedef enum MLErrorType {
     MLErrorType_DeviceLost = 0x00000004,
     MLErrorType_Force32 = 0x7FFFFFFF
 } MLErrorType;
-
-typedef enum MLFilterOperandLayout {
-    MLFilterOperandLayout_Oihw = 0x00000000,
-    MLFilterOperandLayout_Hwio = 0x00000001,
-    MLFilterOperandLayout_Ohwi = 0x00000002,
-    MLFilterOperandLayout_Ihwo = 0x00000003,
-    MLFilterOperandLayout_Force32 = 0x7FFFFFFF
-} MLFilterOperandLayout;
 
 typedef enum MLInputOperandLayout {
     MLInputOperandLayout_Nchw = 0x00000000,
@@ -144,6 +161,12 @@ typedef enum MLRecurrentNetworkWeightLayout {
     MLRecurrentNetworkWeightLayout_Force32 = 0x7FFFFFFF
 } MLRecurrentNetworkWeightLayout;
 
+typedef enum MLRoundingType {
+    MLRoundingType_Floor = 0x00000000,
+    MLRoundingType_Ceil = 0x00000001,
+    MLRoundingType_Force32 = 0x7FFFFFFF
+} MLRoundingType;
+
 
 typedef struct MLArrayBufferView {
     void * buffer;
@@ -156,7 +179,7 @@ typedef struct MLBatchNormOptions {
     MLOperand bias;
     uint32_t axis;
     float epsilon;
-    MLOperator activation;
+    MLFusionOperator activation;
 } MLBatchNormOptions;
 
 typedef struct MLClampOptions {
@@ -169,7 +192,7 @@ typedef struct MLContextOptions {
     MLPowerPreference powerPreference;
 } MLContextOptions;
 
-typedef struct MLConv2dOptions {
+typedef struct MLConvTranspose2dOptions {
     uint32_t paddingCount;
     int32_t const * padding;
     uint32_t stridesCount;
@@ -181,12 +204,26 @@ typedef struct MLConv2dOptions {
     uint32_t outputSizesCount;
     int32_t const * outputSizes;
     MLAutoPad autoPad;
-    bool transpose;
     int32_t groups;
     MLInputOperandLayout inputLayout;
-    MLFilterOperandLayout filterLayout;
+    MLConvTranspose2dFilterOperandLayout filterLayout;
     MLOperand bias;
-    MLOperator activation;
+    MLFusionOperator activation;
+} MLConvTranspose2dOptions;
+
+typedef struct MLConv2dOptions {
+    uint32_t paddingCount;
+    int32_t const * padding;
+    uint32_t stridesCount;
+    int32_t const * strides;
+    uint32_t dilationsCount;
+    int32_t const * dilations;
+    MLAutoPad autoPad;
+    int32_t groups;
+    MLInputOperandLayout inputLayout;
+    MLConv2dFilterOperandLayout filterLayout;
+    MLOperand bias;
+    MLFusionOperator activation;
 } MLConv2dOptions;
 
 typedef struct MLGemmOptions {
@@ -207,6 +244,9 @@ typedef struct MLGruOptions {
     MLRecurrentNetworkWeightLayout layout;
     MLOperatorArray activations;
 } MLGruOptions;
+
+typedef struct MLInstanceDescriptor {
+} MLInstanceDescriptor;
 
 typedef struct MLInstanceNormOptions {
     MLOperand scale;
@@ -241,6 +281,9 @@ typedef struct MLPool2dOptions {
     int32_t const * dilations;
     MLAutoPad autoPad;
     MLInputOperandLayout layout;
+    MLRoundingType roundingType;
+    uint32_t outputSizesCount;
+    int32_t const * outputSizes;
 } MLPool2dOptions;
 
 typedef struct MLReduceOptions {
@@ -308,6 +351,10 @@ typedef void (*WebnnProcContextSetUncapturedErrorCallback)(MLContext context, ML
 typedef void (*WebnnProcContextReference)(MLContext context);
 typedef void (*WebnnProcContextRelease)(MLContext context);
 
+// Procs of FusionOperator
+typedef void (*WebnnProcFusionOperatorReference)(MLFusionOperator fusionOperator);
+typedef void (*WebnnProcFusionOperatorRelease)(MLFusionOperator fusionOperator);
+
 // Procs of Graph
 typedef MLComputeGraphStatus (*WebnnProcGraphCompute)(MLGraph graph, MLNamedInputs inputs, MLNamedOutputs outputs);
 typedef void (*WebnnProcGraphReference)(MLGraph graph);
@@ -321,9 +368,10 @@ typedef MLOperand (*WebnnProcGraphBuilderBatchNorm)(MLGraphBuilder graphBuilder,
 typedef MLGraph (*WebnnProcGraphBuilderBuild)(MLGraphBuilder graphBuilder, MLNamedOperands namedOperands);
 typedef MLOperand (*WebnnProcGraphBuilderCeil)(MLGraphBuilder graphBuilder, MLOperand input);
 typedef MLOperand (*WebnnProcGraphBuilderClamp)(MLGraphBuilder graphBuilder, MLOperand input, MLClampOptions const * options);
-typedef MLOperator (*WebnnProcGraphBuilderClampOperator)(MLGraphBuilder graphBuilder, MLClampOptions const * options);
+typedef MLFusionOperator (*WebnnProcGraphBuilderClampOperator)(MLGraphBuilder graphBuilder, MLClampOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderConcat)(MLGraphBuilder graphBuilder, uint32_t inputsCount, MLOperand const * inputs, uint32_t axis);
 typedef MLOperand (*WebnnProcGraphBuilderConstant)(MLGraphBuilder graphBuilder, MLOperandDescriptor const * desc, MLArrayBufferView const * value);
+typedef MLOperand (*WebnnProcGraphBuilderConvTranspose2d)(MLGraphBuilder graphBuilder, MLOperand input, MLOperand filter, MLConvTranspose2dOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderConv2d)(MLGraphBuilder graphBuilder, MLOperand input, MLOperand filter, MLConv2dOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderCos)(MLGraphBuilder graphBuilder, MLOperand input);
 typedef MLOperand (*WebnnProcGraphBuilderDiv)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
@@ -332,12 +380,12 @@ typedef MLOperand (*WebnnProcGraphBuilderFloor)(MLGraphBuilder graphBuilder, MLO
 typedef MLOperand (*WebnnProcGraphBuilderGemm)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b, MLGemmOptions const * options);
 typedef MLOperandArray (*WebnnProcGraphBuilderGru)(MLGraphBuilder graphBuilder, MLOperand input, MLOperand weight, MLOperand recurrentWeight, int32_t steps, int32_t hiddenSize, MLGruOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderHardSwish)(MLGraphBuilder graphBuilder, MLOperand input);
-typedef MLOperator (*WebnnProcGraphBuilderHardSwishOperator)(MLGraphBuilder graphBuilder);
+typedef MLFusionOperator (*WebnnProcGraphBuilderHardSwishOperator)(MLGraphBuilder graphBuilder);
 typedef MLOperand (*WebnnProcGraphBuilderInput)(MLGraphBuilder graphBuilder, char const * name, MLOperandDescriptor const * desc);
 typedef MLOperand (*WebnnProcGraphBuilderInstanceNorm)(MLGraphBuilder graphBuilder, MLOperand input, MLInstanceNormOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderL2Pool2d)(MLGraphBuilder graphBuilder, MLOperand input, MLPool2dOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderLeakyRelu)(MLGraphBuilder graphBuilder, MLOperand input, MLLeakyReluOptions const * options);
-typedef MLOperator (*WebnnProcGraphBuilderLeakyReluOperator)(MLGraphBuilder graphBuilder, MLLeakyReluOptions const * options);
+typedef MLFusionOperator (*WebnnProcGraphBuilderLeakyReluOperator)(MLGraphBuilder graphBuilder, MLLeakyReluOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderLog)(MLGraphBuilder graphBuilder, MLOperand input);
 typedef MLOperand (*WebnnProcGraphBuilderMatmul)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
 typedef MLOperand (*WebnnProcGraphBuilderMax)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
@@ -355,11 +403,11 @@ typedef MLOperand (*WebnnProcGraphBuilderReduceMin)(MLGraphBuilder graphBuilder,
 typedef MLOperand (*WebnnProcGraphBuilderReduceProduct)(MLGraphBuilder graphBuilder, MLOperand input, MLReduceOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderReduceSum)(MLGraphBuilder graphBuilder, MLOperand input, MLReduceOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderRelu)(MLGraphBuilder graphBuilder, MLOperand input);
-typedef MLOperator (*WebnnProcGraphBuilderReluOperator)(MLGraphBuilder graphBuilder);
+typedef MLFusionOperator (*WebnnProcGraphBuilderReluOperator)(MLGraphBuilder graphBuilder);
 typedef MLOperand (*WebnnProcGraphBuilderResample2d)(MLGraphBuilder graphBuilder, MLOperand input, MLResample2dOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderReshape)(MLGraphBuilder graphBuilder, MLOperand input, int32_t const * newShape, uint32_t newShapeCount);
 typedef MLOperand (*WebnnProcGraphBuilderSigmoid)(MLGraphBuilder graphBuilder, MLOperand input);
-typedef MLOperator (*WebnnProcGraphBuilderSigmoidOperator)(MLGraphBuilder graphBuilder);
+typedef MLFusionOperator (*WebnnProcGraphBuilderSigmoidOperator)(MLGraphBuilder graphBuilder);
 typedef MLOperand (*WebnnProcGraphBuilderSin)(MLGraphBuilder graphBuilder, MLOperand input);
 typedef MLOperand (*WebnnProcGraphBuilderSlice)(MLGraphBuilder graphBuilder, MLOperand input, int32_t const * starts, uint32_t startsCount, int32_t const * sizes, uint32_t sizesCount, MLSliceOptions const * options);
 typedef MLOperand (*WebnnProcGraphBuilderSoftmax)(MLGraphBuilder graphBuilder, MLOperand input);
@@ -368,10 +416,15 @@ typedef MLOperand (*WebnnProcGraphBuilderSqueeze)(MLGraphBuilder graphBuilder, M
 typedef MLOperand (*WebnnProcGraphBuilderSub)(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
 typedef MLOperand (*WebnnProcGraphBuilderTan)(MLGraphBuilder graphBuilder, MLOperand input);
 typedef MLOperand (*WebnnProcGraphBuilderTanh)(MLGraphBuilder graphBuilder, MLOperand input);
-typedef MLOperator (*WebnnProcGraphBuilderTanhOperator)(MLGraphBuilder graphBuilder);
+typedef MLFusionOperator (*WebnnProcGraphBuilderTanhOperator)(MLGraphBuilder graphBuilder);
 typedef MLOperand (*WebnnProcGraphBuilderTranspose)(MLGraphBuilder graphBuilder, MLOperand input, MLTransposeOptions const * options);
 typedef void (*WebnnProcGraphBuilderReference)(MLGraphBuilder graphBuilder);
 typedef void (*WebnnProcGraphBuilderRelease)(MLGraphBuilder graphBuilder);
+
+// Procs of Instance
+typedef MLContext (*WebnnProcInstanceCreateContext)(MLInstance instance, MLContextOptions const * options);
+typedef void (*WebnnProcInstanceReference)(MLInstance instance);
+typedef void (*WebnnProcInstanceRelease)(MLInstance instance);
 
 // Procs of NamedInputs
 typedef void (*WebnnProcNamedInputsSet)(MLNamedInputs namedInputs, char const * name, MLInput const * input);
@@ -398,13 +451,9 @@ typedef size_t (*WebnnProcOperandArraySize)(MLOperandArray operandArray);
 typedef void (*WebnnProcOperandArrayReference)(MLOperandArray operandArray);
 typedef void (*WebnnProcOperandArrayRelease)(MLOperandArray operandArray);
 
-// Procs of Operator
-typedef void (*WebnnProcOperatorReference)(MLOperator mlOperator);
-typedef void (*WebnnProcOperatorRelease)(MLOperator mlOperator);
-
 // Procs of OperatorArray
-typedef MLOperator (*WebnnProcOperatorArrayGet)(MLOperatorArray operatorArray, size_t index);
-typedef void (*WebnnProcOperatorArraySet)(MLOperatorArray operatorArray, MLOperator mlOperator);
+typedef MLFusionOperator (*WebnnProcOperatorArrayGet)(MLOperatorArray operatorArray, size_t index);
+typedef void (*WebnnProcOperatorArraySet)(MLOperatorArray operatorArray, MLFusionOperator mlOperator);
 typedef size_t (*WebnnProcOperatorArraySize)(MLOperatorArray operatorArray);
 typedef void (*WebnnProcOperatorArrayReference)(MLOperatorArray operatorArray);
 typedef void (*WebnnProcOperatorArrayRelease)(MLOperatorArray operatorArray);
@@ -426,6 +475,10 @@ WEBNN_EXPORT void mlContextSetUncapturedErrorCallback(MLContext context, MLError
 WEBNN_EXPORT void mlContextReference(MLContext context);
 WEBNN_EXPORT void mlContextRelease(MLContext context);
 
+// Methods of FusionOperator
+WEBNN_EXPORT void mlFusionOperatorReference(MLFusionOperator fusionOperator);
+WEBNN_EXPORT void mlFusionOperatorRelease(MLFusionOperator fusionOperator);
+
 // Methods of Graph
 WEBNN_EXPORT MLComputeGraphStatus mlGraphCompute(MLGraph graph, MLNamedInputs inputs, MLNamedOutputs outputs);
 WEBNN_EXPORT void mlGraphReference(MLGraph graph);
@@ -439,9 +492,10 @@ WEBNN_EXPORT MLOperand mlGraphBuilderBatchNorm(MLGraphBuilder graphBuilder, MLOp
 WEBNN_EXPORT MLGraph mlGraphBuilderBuild(MLGraphBuilder graphBuilder, MLNamedOperands namedOperands);
 WEBNN_EXPORT MLOperand mlGraphBuilderCeil(MLGraphBuilder graphBuilder, MLOperand input);
 WEBNN_EXPORT MLOperand mlGraphBuilderClamp(MLGraphBuilder graphBuilder, MLOperand input, MLClampOptions const * options);
-WEBNN_EXPORT MLOperator mlGraphBuilderClampOperator(MLGraphBuilder graphBuilder, MLClampOptions const * options);
+WEBNN_EXPORT MLFusionOperator mlGraphBuilderClampOperator(MLGraphBuilder graphBuilder, MLClampOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderConcat(MLGraphBuilder graphBuilder, uint32_t inputsCount, MLOperand const * inputs, uint32_t axis);
 WEBNN_EXPORT MLOperand mlGraphBuilderConstant(MLGraphBuilder graphBuilder, MLOperandDescriptor const * desc, MLArrayBufferView const * value);
+WEBNN_EXPORT MLOperand mlGraphBuilderConvTranspose2d(MLGraphBuilder graphBuilder, MLOperand input, MLOperand filter, MLConvTranspose2dOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderConv2d(MLGraphBuilder graphBuilder, MLOperand input, MLOperand filter, MLConv2dOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderCos(MLGraphBuilder graphBuilder, MLOperand input);
 WEBNN_EXPORT MLOperand mlGraphBuilderDiv(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
@@ -450,12 +504,12 @@ WEBNN_EXPORT MLOperand mlGraphBuilderFloor(MLGraphBuilder graphBuilder, MLOperan
 WEBNN_EXPORT MLOperand mlGraphBuilderGemm(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b, MLGemmOptions const * options);
 WEBNN_EXPORT MLOperandArray mlGraphBuilderGru(MLGraphBuilder graphBuilder, MLOperand input, MLOperand weight, MLOperand recurrentWeight, int32_t steps, int32_t hiddenSize, MLGruOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderHardSwish(MLGraphBuilder graphBuilder, MLOperand input);
-WEBNN_EXPORT MLOperator mlGraphBuilderHardSwishOperator(MLGraphBuilder graphBuilder);
+WEBNN_EXPORT MLFusionOperator mlGraphBuilderHardSwishOperator(MLGraphBuilder graphBuilder);
 WEBNN_EXPORT MLOperand mlGraphBuilderInput(MLGraphBuilder graphBuilder, char const * name, MLOperandDescriptor const * desc);
 WEBNN_EXPORT MLOperand mlGraphBuilderInstanceNorm(MLGraphBuilder graphBuilder, MLOperand input, MLInstanceNormOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderL2Pool2d(MLGraphBuilder graphBuilder, MLOperand input, MLPool2dOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderLeakyRelu(MLGraphBuilder graphBuilder, MLOperand input, MLLeakyReluOptions const * options);
-WEBNN_EXPORT MLOperator mlGraphBuilderLeakyReluOperator(MLGraphBuilder graphBuilder, MLLeakyReluOptions const * options);
+WEBNN_EXPORT MLFusionOperator mlGraphBuilderLeakyReluOperator(MLGraphBuilder graphBuilder, MLLeakyReluOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderLog(MLGraphBuilder graphBuilder, MLOperand input);
 WEBNN_EXPORT MLOperand mlGraphBuilderMatmul(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
 WEBNN_EXPORT MLOperand mlGraphBuilderMax(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
@@ -473,11 +527,11 @@ WEBNN_EXPORT MLOperand mlGraphBuilderReduceMin(MLGraphBuilder graphBuilder, MLOp
 WEBNN_EXPORT MLOperand mlGraphBuilderReduceProduct(MLGraphBuilder graphBuilder, MLOperand input, MLReduceOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderReduceSum(MLGraphBuilder graphBuilder, MLOperand input, MLReduceOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderRelu(MLGraphBuilder graphBuilder, MLOperand input);
-WEBNN_EXPORT MLOperator mlGraphBuilderReluOperator(MLGraphBuilder graphBuilder);
+WEBNN_EXPORT MLFusionOperator mlGraphBuilderReluOperator(MLGraphBuilder graphBuilder);
 WEBNN_EXPORT MLOperand mlGraphBuilderResample2d(MLGraphBuilder graphBuilder, MLOperand input, MLResample2dOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderReshape(MLGraphBuilder graphBuilder, MLOperand input, int32_t const * newShape, uint32_t newShapeCount);
 WEBNN_EXPORT MLOperand mlGraphBuilderSigmoid(MLGraphBuilder graphBuilder, MLOperand input);
-WEBNN_EXPORT MLOperator mlGraphBuilderSigmoidOperator(MLGraphBuilder graphBuilder);
+WEBNN_EXPORT MLFusionOperator mlGraphBuilderSigmoidOperator(MLGraphBuilder graphBuilder);
 WEBNN_EXPORT MLOperand mlGraphBuilderSin(MLGraphBuilder graphBuilder, MLOperand input);
 WEBNN_EXPORT MLOperand mlGraphBuilderSlice(MLGraphBuilder graphBuilder, MLOperand input, int32_t const * starts, uint32_t startsCount, int32_t const * sizes, uint32_t sizesCount, MLSliceOptions const * options);
 WEBNN_EXPORT MLOperand mlGraphBuilderSoftmax(MLGraphBuilder graphBuilder, MLOperand input);
@@ -486,10 +540,15 @@ WEBNN_EXPORT MLOperand mlGraphBuilderSqueeze(MLGraphBuilder graphBuilder, MLOper
 WEBNN_EXPORT MLOperand mlGraphBuilderSub(MLGraphBuilder graphBuilder, MLOperand a, MLOperand b);
 WEBNN_EXPORT MLOperand mlGraphBuilderTan(MLGraphBuilder graphBuilder, MLOperand input);
 WEBNN_EXPORT MLOperand mlGraphBuilderTanh(MLGraphBuilder graphBuilder, MLOperand input);
-WEBNN_EXPORT MLOperator mlGraphBuilderTanhOperator(MLGraphBuilder graphBuilder);
+WEBNN_EXPORT MLFusionOperator mlGraphBuilderTanhOperator(MLGraphBuilder graphBuilder);
 WEBNN_EXPORT MLOperand mlGraphBuilderTranspose(MLGraphBuilder graphBuilder, MLOperand input, MLTransposeOptions const * options);
 WEBNN_EXPORT void mlGraphBuilderReference(MLGraphBuilder graphBuilder);
 WEBNN_EXPORT void mlGraphBuilderRelease(MLGraphBuilder graphBuilder);
+
+// Methods of Instance
+WEBNN_EXPORT MLContext mlInstanceCreateContext(MLInstance instance, MLContextOptions const * options);
+WEBNN_EXPORT void mlInstanceReference(MLInstance instance);
+WEBNN_EXPORT void mlInstanceRelease(MLInstance instance);
 
 // Methods of NamedInputs
 WEBNN_EXPORT void mlNamedInputsSet(MLNamedInputs namedInputs, char const * name, MLInput const * input);
@@ -516,13 +575,9 @@ WEBNN_EXPORT size_t mlOperandArraySize(MLOperandArray operandArray);
 WEBNN_EXPORT void mlOperandArrayReference(MLOperandArray operandArray);
 WEBNN_EXPORT void mlOperandArrayRelease(MLOperandArray operandArray);
 
-// Methods of Operator
-WEBNN_EXPORT void mlOperatorReference(MLOperator mlOperator);
-WEBNN_EXPORT void mlOperatorRelease(MLOperator mlOperator);
-
 // Methods of OperatorArray
-WEBNN_EXPORT MLOperator mlOperatorArrayGet(MLOperatorArray operatorArray, size_t index);
-WEBNN_EXPORT void mlOperatorArraySet(MLOperatorArray operatorArray, MLOperator mlOperator);
+WEBNN_EXPORT MLFusionOperator mlOperatorArrayGet(MLOperatorArray operatorArray, size_t index);
+WEBNN_EXPORT void mlOperatorArraySet(MLOperatorArray operatorArray, MLFusionOperator mlOperator);
 WEBNN_EXPORT size_t mlOperatorArraySize(MLOperatorArray operatorArray);
 WEBNN_EXPORT void mlOperatorArrayReference(MLOperatorArray operatorArray);
 WEBNN_EXPORT void mlOperatorArrayRelease(MLOperatorArray operatorArray);

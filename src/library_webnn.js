@@ -114,14 +114,15 @@ var LibraryWebNN = {
       }
 
       {{{ webnn.makeInitManager('Context') }}}
+      {{{ webnn.makeInitManager('FusionOperator') }}}
       {{{ webnn.makeInitManager('Graph') }}}
       {{{ webnn.makeInitManager('GraphBuilder') }}}
+      {{{ webnn.makeInitManager('Instance') }}}
       {{{ webnn.makeInitManager('NamedInputs') }}}
       {{{ webnn.makeInitManager('NamedOutputs') }}}
       {{{ webnn.makeInitManager('NamedOperands') }}}
       {{{ webnn.makeInitManager('Operand') }}}
       {{{ webnn.makeInitManager('OperandArray') }}}
-      {{{ webnn.makeInitManager('Operator') }}}
       {{{ webnn.makeInitManager('OperatorArray') }}}
     },
 
@@ -135,6 +136,17 @@ var LibraryWebNN = {
       'error',
       'context-lost',
       'unknown',
+    ],
+    ConvTranspose2dFilterOperandLayout: [
+      "iohw",
+      "hwoi",
+      "ohwi",
+    ],
+    Conv2dFilterOperandLayout: [
+      "oihw",
+      "hwio",
+      "ohwi",
+      "ihwo",
     ],
     DevicePreference: [
       'default',
@@ -152,12 +164,6 @@ var LibraryWebNN = {
       'out-of-memory',
       'unknown',
       'device-lost',
-    ],
-    FilterOperandLayout: [
-      'oihw',
-      'hwio',
-      'ohwi',
-      'ihwo',
     ],
     InputOperandLayout: [
       'nchw',
@@ -194,6 +200,10 @@ var LibraryWebNN = {
     RecurrentNetworkWeightLayout: [
       'zrn',
       'rzn',
+    ],
+    RoundingType: [
+      'floor',
+      'ceil',
     ],
 
     makeI32Array: function(count, arrayPtr) {
@@ -251,7 +261,7 @@ var LibraryWebNN = {
         "bias": WebNN.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLBatchNormOptions.bias, '*') }}}),
         "axis": {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLBatchNormOptions.axis) }}},
         "epsilon": {{{ webnn.makeGetF32('ptr', C_STRUCTS.MLBatchNormOptions.epsilon) }}},
-        "activation": WebNN.mgrOperator.get({{{ makeGetValue('ptr', C_STRUCTS.MLBatchNormOptions.activation, '*') }}}),
+        "activation": WebNN.mgrFusionOperator.get({{{ makeGetValue('ptr', C_STRUCTS.MLBatchNormOptions.activation, '*') }}}),
       };
     },
 
@@ -299,7 +309,46 @@ var LibraryWebNN = {
         ),
       };
     },
-    
+
+    makeConvTranspose2dOptions: function(ptr) {
+      return {
+        "padding": WebNN.AutoPad[
+            {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConvTranspose2dOptions.autoPad) }}}
+          ] === 'explicit' ? WebNN.makeI32Array(
+            {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConvTranspose2dOptions.paddingCount) }}},
+            {{{ makeGetValue('ptr', C_STRUCTS.MLConvTranspose2dOptions.padding, '*') }}}
+          ) : undefined,
+        "strides": WebNN.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConvTranspose2dOptions.stridesCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLConvTranspose2dOptions.strides, '*') }}}
+        ),
+        "dilations": WebNN.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConvTranspose2dOptions.dilationsCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLConvTranspose2dOptions.dilations, '*') }}}
+        ),
+        "outputPadding": WebNN.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConvTranspose2dOptions.outputPaddingCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLConvTranspose2dOptions.outputPadding, '*') }}}
+        ),
+        "outputSizes": WebNN.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLConvTranspose2dOptions.outputSizesCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLConvTranspose2dOptions.outputSizes, '*') }}}
+        ),
+        "autoPad": WebNN.AutoPad[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConvTranspose2dOptions.autoPad) }}}
+        ],
+        "groups": {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConvTranspose2dOptions.groups) }}},
+        "inputLayout": WebNN.InputOperandLayout[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConvTranspose2dOptions.inputLayout) }}}
+        ],
+        "filterLayout": WebNN.ConvTranspose2dFilterOperandLayout[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConvTranspose2dOptions.filterLayout) }}}
+        ],
+        "bias": WebNN.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLConvTranspose2dOptions.bias, '*') }}}),
+        "activation": WebNN.mgrFusionOperator.get({{{ makeGetValue('ptr', C_STRUCTS.MLConvTranspose2dOptions.activation, '*') }}}),
+      };
+    },
+
     makeConv2dOptions: function(ptr) {
       return {
         "padding": WebNN.AutoPad[
@@ -323,11 +372,11 @@ var LibraryWebNN = {
         "inputLayout": WebNN.InputOperandLayout[
           {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.inputLayout) }}}
         ],
-        "filterLayout": WebNN.FilterOperandLayout[
+        "filterLayout": WebNN.Conv2dFilterOperandLayout[
           {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLConv2dOptions.filterLayout) }}}
         ],
         "bias": WebNN.mgrOperand.get({{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.bias, '*') }}}),
-        "activation": WebNN.mgrOperator.get({{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.activation, '*') }}}),
+        "activation": WebNN.mgrFusionOperator.get({{{ makeGetValue('ptr', C_STRUCTS.MLConv2dOptions.activation, '*') }}}),
       };
     },
 
@@ -357,6 +406,13 @@ var LibraryWebNN = {
         "layout": WebNN.InputOperandLayout[
           {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLPool2dOptions.layout) }}}
         ],
+        "roundingType": WebNN.RoundingType[
+          {{{ webnn.makeGetI32('ptr', C_STRUCTS.MLPool2dOptions.roundingType) }}}
+        ],
+        "outputSizes": WebNN.makeI32Array(
+          {{{ webnn.makeGetU32('ptr', C_STRUCTS.MLPool2dOptions.outputSizesCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.MLPool2dOptions.outputSizes, '*') }}}
+        ),
       };
     },
 
@@ -414,14 +470,15 @@ var LibraryWebNN = {
   // *Reference/*Release
 
   {{{ webnn.makeReferenceRelease('Context') }}}
+  {{{ webnn.makeReferenceRelease('FusionOperator') }}}
   {{{ webnn.makeReferenceRelease('Graph') }}}
   {{{ webnn.makeReferenceRelease('GraphBuilder') }}}
+  {{{ webnn.makeReferenceRelease('Instance') }}}
   {{{ webnn.makeReferenceRelease('NamedInputs') }}}
   {{{ webnn.makeReferenceRelease('NamedOperands') }}}
   {{{ webnn.makeReferenceRelease('NamedOutputs') }}}
   {{{ webnn.makeReferenceRelease('Operand') }}}
   {{{ webnn.makeReferenceRelease('OperandArray') }}}
-  {{{ webnn.makeReferenceRelease('Operator') }}}
   {{{ webnn.makeReferenceRelease('OperatorArray') }}}
 
   // Methods of GraphBuilder
@@ -475,7 +532,7 @@ var LibraryWebNN = {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var options = WebNN.makeClampOptions(optionsPtr);
     var clamp = builder["clamp"](options);
-    return WebNN.mgrOperator.create(clamp);
+    return WebNN.mgrFusionOperator.create(clamp);
   },
 
   mlGraphBuilderConcat: function(builderId, inputsCount, inputsPtr, axis) {
@@ -508,6 +565,15 @@ var LibraryWebNN = {
     var filter = WebNN.mgrOperand.get(filterId);
     var options = WebNN.makeConv2dOptions(optionsPtr);
     var conv2d = builder["conv2d"](input, filter, options);
+    return WebNN.mgrOperand.create(conv2d);
+  },
+
+  mlGraphBuilderConvTranspose2d: function(builderId, inputId, filterId, optionsPtr) {
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var filter = WebNN.mgrOperand.get(filterId);
+    var options = WebNN.makeConvTranspose2dOptions(optionsPtr);
+    var conv2d = builder["convTranspose2d"](input, filter, options);
     return WebNN.mgrOperand.create(conv2d);
   },
 
@@ -559,7 +625,7 @@ var LibraryWebNN = {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var options = WebNN.makeLeakyReluOptions(optionsPtr);
     var output = builder["leakyRelu"](options);
-    return WebNN.mgrOperator.create(output);
+    return WebNN.mgrFusionOperator.create(output);
   },
 
   mlGraphBuilderMatmul: function(builderId, aId, bId) {
@@ -596,7 +662,7 @@ var LibraryWebNN = {
   mlGraphBuilderReluOperator: function(builderId) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var output = builder["relu"]();
-    return WebNN.mgrOperator.create(output);
+    return WebNN.mgrFusionOperator.create(output);
   },
 
   mlGraphBuilderResample2d: function(builderId, inputId, optionsPtr) {
@@ -625,7 +691,7 @@ var LibraryWebNN = {
   mlGraphBuilderSigmoidOperator: function(builderId) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var output = builder["sigmoid"]();
-    return WebNN.mgrOperator.create(output);
+    return WebNN.mgrFusionOperator.create(output);
   },
 
   mlGraphBuilderSoftmax: function(builderId, inputId) {
@@ -663,7 +729,7 @@ var LibraryWebNN = {
   mlGraphBuilderTanhOperator: function(builderId) {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var output = builder["tanh"]();
-    return WebNN.mgrOperator.create(output);
+    return WebNN.mgrFusionOperator.create(output);
   },
 
   mlGraphBuilderTranspose: function(builderId, inputId, optionsPtr) {
@@ -688,12 +754,12 @@ var LibraryWebNN = {
   mlOperatorArrayGet: function(operatorArrayId, indexId) {
     var operatorArray = WebNN.mgrOperatorArray.get(operatorArrayId);
     var operator = operatorArray[indexId];
-    return WebNN.mgrOperator.create(operator);
+    return WebNN.mgrFusionOperator.create(operator);
   },
 
   mlOperatorArraySet: function(operatorArrayId, mlOperatorId) {
     var operatorArray = WebNN.mgrOperatorArray.get(operatorArrayId);
-    var mlOperator = WebNN.mgrOperator.get(mlOperatorId);
+    var mlOperator = WebNN.mgrFusionOperator.get(mlOperatorId);
     operatorArray.push(mlOperator);
   },
 
