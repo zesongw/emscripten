@@ -20,9 +20,9 @@ mergeInto(LibraryManager.library, {
     if (optionsPtr !== 0) {
       options = {
           'devicePreference': DevicePreference[
-            {{{ makeGetValue('optionsPtr', C_STRUCTS.MLContextOptions.devicePreference, 'i32', false, true) }}}],
+            {{{ makeGetValue('optionsPtr', C_STRUCTS.WNNContextOptions.devicePreference, 'i32', false, true) }}}],
           'powerPreference': PowerPreference[
-            {{{ makeGetValue('optionsPtr', C_STRUCTS.MLContextOptions.powerPreference, 'i32', false, true) }}}]
+            {{{ makeGetValue('optionsPtr', C_STRUCTS.WNNContextOptions.powerPreference, 'i32', false, true) }}}]
       };
     }
     var context = navigator['ml'].createContext(options);
