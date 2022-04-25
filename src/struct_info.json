@@ -1376,27 +1376,27 @@
         "file": "webnn/webnn.h",
         "defines": [],
         "structs": {
-            "MLArrayBufferView": [
+            "WNNArrayBufferView": [
                 "buffer",
                 "byteLength",
                 "byteOffset"
             ],
-            "MLBatchNormOptions": [
+            "WNNBatchNormOptions": [
                 "scale",
                 "bias",
                 "axis",
                 "epsilon",
                 "activation"
             ],
-            "MLClampOptions": [
+            "WNNClampOptions": [
                 "minValue",
                 "maxValue"
             ],
-            "MLContextOptions": [
+            "WNNContextOptions": [
                 "devicePreference",
                 "powerPreference"
             ],
-            "MLConvTranspose2dOptions": [
+            "WNNConvTranspose2dOptions": [
                 "paddingCount",
                 "padding",
                 "stridesCount",
@@ -1414,7 +1414,7 @@
                 "bias",
                 "activation"
             ],
-            "MLConv2dOptions": [
+            "WNNConv2dOptions": [
                 "paddingCount",
                 "padding",
                 "stridesCount",
@@ -1428,14 +1428,26 @@
                 "bias",
                 "activation"
             ],
-            "MLGemmOptions": [
+            "WNNGemmOptions": [
                 "c",
                 "alpha",
                 "beta",
                 "aTranspose",
                 "bTranspose"
             ],
-            "MLGruOptions": [
+            "WNNGpuBufferView": [
+                "buffer",
+                "id",
+                "generation",
+                "size",
+                "offset"
+            ],
+            "WNNGpuDevice": [
+                "device",
+                "id",
+                "generation"
+            ],
+            "WNNGruOptions": [
                 "bias",
                 "recurrentBias",
                 "initialHiddenState",
@@ -1445,25 +1457,25 @@
                 "layout",
                 "activations"
             ],
-            "MLInstanceNormOptions": [
+            "WNNInstanceNormOptions": [
                 "scale",
                 "bias",
                 "epsilon",
                 "layout"
             ],
-            "MLLeakyReluOptions": [
+            "WNNLeakyReluOptions": [
                 "alpha"
             ],
-            "MLOperandDescriptor": [
+            "WNNOperandDescriptor": [
                 "type",
                 "dimensions",
                 "dimensionsCount"
             ],
-            "MLPadOptions": [
+            "WNNPadOptions": [
                 "mode",
                 "value"
             ],
-            "MLPool2dOptions": [
+            "WNNPool2dOptions": [
                 "windowDimensionsCount",
                 "windowDimensions",
                 "paddingCount",
@@ -1478,12 +1490,12 @@
                 "outputSizesCount",
                 "outputSizes"
             ],
-            "MLReduceOptions": [
+            "WNNReduceOptions": [
                 "axesCount",
                 "axes",
                 "keepDimensions"
             ],
-            "MLResample2dOptions": [
+            "WNNResample2dOptions": [
                 "mode",
                 "scalesCount",
                 "scales",
@@ -1492,22 +1504,26 @@
                 "axesCount",
                 "axes"
             ],
-            "MLSliceOptions": [
+            "WNNSliceOptions": [
                 "axesCount",
                 "axes"
             ],
-            "MLSplitOptions": [
+            "WNNSplitOptions": [
                 "axis"
             ],
-            "MLSqueezeOptions": [
+            "WNNSqueezeOptions": [
                 "axesCount",
                 "axes"
             ],
-            "MLTransposeOptions": [
+            "WNNTransposeOptions": [
                 "permutationCount",
                 "permutation"
             ],
-            "MLInput": [
+            "WNNResource": [
+                "arrayBufferView",
+                "gpuBufferView"
+            ],
+            "WNNInput": [
                 "resource",
                 "dimensions",
                 "dimensionsCount"

@@ -6,7 +6,7 @@
 
 #include <limits>
 
-namespace ml {
+namespace wnn {
 
     enum class AutoPad : uint32_t {
         Explicit = 0x00000000,
@@ -20,13 +20,7 @@ namespace ml {
         OpenVINO = 0x00000002,
         OneDNN = 0x00000003,
         MLAS = 0x00000004,
-    };
-
-    enum class ComputeGraphStatus : uint32_t {
-        Success = 0x00000000,
-        Error = 0x00000001,
-        ContextLost = 0x00000002,
-        Unknown = 0x00000003,
+        XNNPACK = 0x00000005,
     };
 
     enum class ConvTranspose2dFilterOperandLayout : uint32_t {
@@ -114,7 +108,8 @@ namespace ml {
 
 
     using Proc = WebnnProc;
-    using ErrorCallback = MLErrorCallback;
+    using ComputeAsyncCallback = WNNComputeAsyncCallback;
+    using ErrorCallback = WNNErrorCallback;
 
     class Context;
     class FusionOperator;
@@ -135,6 +130,8 @@ namespace ml {
     struct ConvTranspose2dOptions;
     struct Conv2dOptions;
     struct GemmOptions;
+    struct GpuBufferView;
+    struct GpuDevice;
     struct GruOptions;
     struct InstanceDescriptor;
     struct InstanceNormOptions;
@@ -148,6 +145,7 @@ namespace ml {
     struct SplitOptions;
     struct SqueezeOptions;
     struct TransposeOptions;
+    struct Resource;
     struct Input;
 
     template<typename Derived, typename CType>
@@ -227,47 +225,49 @@ namespace ml {
 
 
 
-    class Context : public ObjectBase<Context, MLContext> {
+    class Context : public ObjectBase<Context, WNNContext> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
+        void InjectError(ErrorType type, char const * message) const;
         bool PopErrorScope(ErrorCallback callback, void * userdata) const;
         void PushErrorScope(ErrorFilter filter) const;
         void SetUncapturedErrorCallback(ErrorCallback callback, void * userdata) const;
 
       private:
-        friend ObjectBase<Context, MLContext>;
-        static void WebnnReference(MLContext handle);
-        static void WebnnRelease(MLContext handle);
+        friend ObjectBase<Context, WNNContext>;
+        static void WebnnReference(WNNContext handle);
+        static void WebnnRelease(WNNContext handle);
     };
 
-    class FusionOperator : public ObjectBase<FusionOperator, MLFusionOperator> {
+    class FusionOperator : public ObjectBase<FusionOperator, WNNFusionOperator> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
 
       private:
-        friend ObjectBase<FusionOperator, MLFusionOperator>;
-        static void WebnnReference(MLFusionOperator handle);
-        static void WebnnRelease(MLFusionOperator handle);
+        friend ObjectBase<FusionOperator, WNNFusionOperator>;
+        static void WebnnReference(WNNFusionOperator handle);
+        static void WebnnRelease(WNNFusionOperator handle);
     };
 
-    class Graph : public ObjectBase<Graph, MLGraph> {
+    class Graph : public ObjectBase<Graph, WNNGraph> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
-        ComputeGraphStatus Compute(NamedInputs const& inputs, NamedOutputs const& outputs) const;
+        void Compute(NamedInputs const& inputs, NamedOutputs const& outputs) const;
+        void ComputeAsync(NamedInputs const& inputs, NamedOutputs const& outputs, ComputeAsyncCallback callback, void * userdata) const;
 
       private:
-        friend ObjectBase<Graph, MLGraph>;
-        static void WebnnReference(MLGraph handle);
-        static void WebnnRelease(MLGraph handle);
+        friend ObjectBase<Graph, WNNGraph>;
+        static void WebnnReference(WNNGraph handle);
+        static void WebnnRelease(WNNGraph handle);
     };
 
-    class GraphBuilder : public ObjectBase<GraphBuilder, MLGraphBuilder> {
+    class GraphBuilder : public ObjectBase<GraphBuilder, WNNGraphBuilder> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
@@ -282,6 +282,7 @@ namespace ml {
         FusionOperator ClampOperator(ClampOptions const * options = nullptr) const;
         Operand Concat(uint32_t inputsCount, Operand const * inputs, uint32_t axis) const;
         Operand Constant(OperandDescriptor const * desc, ArrayBufferView const * value) const;
+        Operand ConstantWithGpuBuffer(OperandDescriptor const * desc, GpuBufferView const * value) const;
         Operand ConvTranspose2d(Operand const& input, Operand const& filter, ConvTranspose2dOptions const * options = nullptr) const;
         Operand Conv2d(Operand const& input, Operand const& filter, Conv2dOptions const * options = nullptr) const;
         Operand Cos(Operand const& input) const;
@@ -306,6 +307,8 @@ namespace ml {
         Operand Neg(Operand const& input) const;
         Operand Pad(Operand const& input, Operand const& padding, PadOptions const * options = nullptr) const;
         Operand Pow(Operand const& a, Operand const& b) const;
+        Operand ReduceArgMax(Operand const& input, ReduceOptions const * options = nullptr) const;
+        Operand ReduceArgMin(Operand const& input, ReduceOptions const * options = nullptr) const;
         Operand ReduceL1(Operand const& input, ReduceOptions const * options = nullptr) const;
         Operand ReduceL2(Operand const& input, ReduceOptions const * options = nullptr) const;
         Operand ReduceMax(Operand const& input, ReduceOptions const * options = nullptr) const;
@@ -331,25 +334,31 @@ namespace ml {
         Operand Transpose(Operand const& input, TransposeOptions const * options = nullptr) const;
 
       private:
-        friend ObjectBase<GraphBuilder, MLGraphBuilder>;
-        static void WebnnReference(MLGraphBuilder handle);
-        static void WebnnRelease(MLGraphBuilder handle);
+        friend ObjectBase<GraphBuilder, WNNGraphBuilder>;
+        static void WebnnReference(WNNGraphBuilder handle);
+        static void WebnnRelease(WNNGraphBuilder handle);
     };
 
-    class Instance : public ObjectBase<Instance, MLInstance> {
+    class Instance : public ObjectBase<Instance, WNNInstance> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
         Context CreateContext(ContextOptions const * options = nullptr) const;
+        Context CreateContextWithGpuDevice(GpuDevice const * gpuDevice) const;
+        GraphBuilder CreateGraphBuilder(Context const& context) const;
+        NamedInputs CreateNamedInputs() const;
+        NamedOperands CreateNamedOperands() const;
+        NamedOutputs CreateNamedOutputs() const;
+        OperatorArray CreateOperatorArray() const;
 
       private:
-        friend ObjectBase<Instance, MLInstance>;
-        static void WebnnReference(MLInstance handle);
-        static void WebnnRelease(MLInstance handle);
+        friend ObjectBase<Instance, WNNInstance>;
+        static void WebnnReference(WNNInstance handle);
+        static void WebnnRelease(WNNInstance handle);
     };
 
-    class NamedInputs : public ObjectBase<NamedInputs, MLNamedInputs> {
+    class NamedInputs : public ObjectBase<NamedInputs, WNNNamedInputs> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
@@ -357,12 +366,12 @@ namespace ml {
         void Set(char const * name, Input const * input) const;
 
       private:
-        friend ObjectBase<NamedInputs, MLNamedInputs>;
-        static void WebnnReference(MLNamedInputs handle);
-        static void WebnnRelease(MLNamedInputs handle);
+        friend ObjectBase<NamedInputs, WNNNamedInputs>;
+        static void WebnnReference(WNNNamedInputs handle);
+        static void WebnnRelease(WNNNamedInputs handle);
     };
 
-    class NamedOperands : public ObjectBase<NamedOperands, MLNamedOperands> {
+    class NamedOperands : public ObjectBase<NamedOperands, WNNNamedOperands> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
@@ -370,37 +379,38 @@ namespace ml {
         void Set(char const * name, Operand const& operand) const;
 
       private:
-        friend ObjectBase<NamedOperands, MLNamedOperands>;
-        static void WebnnReference(MLNamedOperands handle);
-        static void WebnnRelease(MLNamedOperands handle);
+        friend ObjectBase<NamedOperands, WNNNamedOperands>;
+        static void WebnnReference(WNNNamedOperands handle);
+        static void WebnnRelease(WNNNamedOperands handle);
     };
 
-    class NamedOutputs : public ObjectBase<NamedOutputs, MLNamedOutputs> {
+    class NamedOutputs : public ObjectBase<NamedOutputs, WNNNamedOutputs> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
-        void Set(char const * name, ArrayBufferView const * resource) const;
+        void Get(char const * name, ArrayBufferView * resource) const;
+        void Set(char const * name, Resource const * resource) const;
 
       private:
-        friend ObjectBase<NamedOutputs, MLNamedOutputs>;
-        static void WebnnReference(MLNamedOutputs handle);
-        static void WebnnRelease(MLNamedOutputs handle);
+        friend ObjectBase<NamedOutputs, WNNNamedOutputs>;
+        static void WebnnReference(WNNNamedOutputs handle);
+        static void WebnnRelease(WNNNamedOutputs handle);
     };
 
-    class Operand : public ObjectBase<Operand, MLOperand> {
+    class Operand : public ObjectBase<Operand, WNNOperand> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
 
       private:
-        friend ObjectBase<Operand, MLOperand>;
-        static void WebnnReference(MLOperand handle);
-        static void WebnnRelease(MLOperand handle);
+        friend ObjectBase<Operand, WNNOperand>;
+        static void WebnnReference(WNNOperand handle);
+        static void WebnnRelease(WNNOperand handle);
     };
 
-    class OperandArray : public ObjectBase<OperandArray, MLOperandArray> {
+    class OperandArray : public ObjectBase<OperandArray, WNNOperandArray> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
@@ -409,24 +419,24 @@ namespace ml {
         size_t Size() const;
 
       private:
-        friend ObjectBase<OperandArray, MLOperandArray>;
-        static void WebnnReference(MLOperandArray handle);
-        static void WebnnRelease(MLOperandArray handle);
+        friend ObjectBase<OperandArray, WNNOperandArray>;
+        static void WebnnReference(WNNOperandArray handle);
+        static void WebnnRelease(WNNOperandArray handle);
     };
 
-    class OperatorArray : public ObjectBase<OperatorArray, MLOperatorArray> {
+    class OperatorArray : public ObjectBase<OperatorArray, WNNOperatorArray> {
       public:
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
         FusionOperator Get(size_t index) const;
-        void Set(FusionOperator const& mlOperator) const;
+        void Set(FusionOperator const& wnnOperator) const;
         size_t Size() const;
 
       private:
-        friend ObjectBase<OperatorArray, MLOperatorArray>;
-        static void WebnnReference(MLOperatorArray handle);
-        static void WebnnRelease(MLOperatorArray handle);
+        friend ObjectBase<OperatorArray, WNNOperatorArray>;
+        static void WebnnReference(WNNOperatorArray handle);
+        static void WebnnRelease(WNNOperatorArray handle);
     };
 
 
@@ -499,6 +509,20 @@ namespace ml {
         float beta = 1.0;
         bool aTranspose = false;
         bool bTranspose = false;
+    };
+
+    struct GpuBufferView {
+        void * buffer = nullptr;
+        uint32_t id = 0;
+        uint32_t generation = 0;
+        size_t size;
+        size_t offset = 0;
+    };
+
+    struct GpuDevice {
+        void * device = nullptr;
+        uint32_t id = 0;
+        uint32_t generation = 0;
     };
 
     struct GruOptions {
@@ -588,8 +612,13 @@ namespace ml {
         int32_t const * permutation = nullptr;
     };
 
+    struct Resource {
+        ArrayBufferView arrayBufferView;
+        GpuBufferView gpuBufferView;
+    };
+
     struct Input {
-        ArrayBufferView resource;
+        Resource resource;
         int32_t const * dimensions = nullptr;
         uint32_t dimensionsCount = 0;
     };
