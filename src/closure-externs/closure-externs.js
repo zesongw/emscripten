@@ -288,4 +288,4 @@ var sampleRate;
 /*
  * WebNN globals
  */
-var WNNGraphBuilder;
+var MLGraphBuilder;
