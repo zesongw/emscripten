@@ -636,12 +636,12 @@ var LibraryWebNN = {
 
   wnnGraphBuilderGru: function(builderId, inputId, weightId, recurrentWeightId,
     steps, hiddenSize, optionsPtr) {
-  var builder = WebNN.mgrGraphBuilder.get(builderId);
-  var input = WebNN.mgrOperand.get(inputId);
-  var weight = WebNN.mgrOperand.get(weightId);
-  var recurrentWeight = WebNN.mgrOperand.get(recurrentWeightId);
-  var options = WebNN.makeGruOptions(optionsPtr);
-  var gru = builder["gru"](input, weight, recurrentWeight, steps, hiddenSize, options);
+    var builder = WebNN.mgrGraphBuilder.get(builderId);
+    var input = WebNN.mgrOperand.get(inputId);
+    var weight = WebNN.mgrOperand.get(weightId);
+    var recurrentWeight = WebNN.mgrOperand.get(recurrentWeightId);
+    var options = WebNN.makeGruOptions(optionsPtr);
+    var gru = builder["gru"](input, weight, recurrentWeight, steps, hiddenSize, options);
   return WebNN.mgrOperandArray.create(gru);
 },
 
