@@ -21,6 +21,7 @@ namespace wnn {
     static_assert(static_cast<uint32_t>(BackendType::OpenVINO) == WNNBackendType_OpenVINO, "value mismatch for BackendType::OpenVINO");
     static_assert(static_cast<uint32_t>(BackendType::OneDNN) == WNNBackendType_OneDNN, "value mismatch for BackendType::OneDNN");
     static_assert(static_cast<uint32_t>(BackendType::MLAS) == WNNBackendType_MLAS, "value mismatch for BackendType::MLAS");
+    static_assert(static_cast<uint32_t>(BackendType::XNNPACK) == WNNBackendType_XNNPACK, "value mismatch for BackendType::XNNPACK");
 
     // ConvTranspose2dFilterOperandLayout
 

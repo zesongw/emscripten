@@ -62,6 +62,7 @@ typedef enum WNNBackendType {
     WNNBackendType_OpenVINO = 0x00000002,
     WNNBackendType_OneDNN = 0x00000003,
     WNNBackendType_MLAS = 0x00000004,
+    WNNBackendType_XNNPACK = 0x00000005,
     WNNBackendType_Force32 = 0x7FFFFFFF
 } WNNBackendType;
 

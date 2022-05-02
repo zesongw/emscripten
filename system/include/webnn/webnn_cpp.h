@@ -20,6 +20,7 @@ namespace wnn {
         OpenVINO = 0x00000002,
         OneDNN = 0x00000003,
         MLAS = 0x00000004,
+        XNNPACK = 0x00000005,
     };
 
     enum class ConvTranspose2dFilterOperandLayout : uint32_t {
