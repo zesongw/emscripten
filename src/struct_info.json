@@ -1543,27 +1543,27 @@
         "file": "webnn/webnn.h",
         "defines": [],
         "structs": {
-            "MLArrayBufferView": [
+            "WNNArrayBufferView": [
                 "buffer",
                 "byteLength",
                 "byteOffset"
             ],
-            "MLBatchNormOptions": [
+            "WNNBatchNormOptions": [
                 "scale",
                 "bias",
                 "axis",
                 "epsilon",
                 "activation"
             ],
-            "MLClampOptions": [
+            "WNNClampOptions": [
                 "minValue",
                 "maxValue"
             ],
-            "MLContextOptions": [
+            "WNNContextOptions": [
                 "devicePreference",
                 "powerPreference"
             ],
-            "MLConv2dOptions": [
+            "WNNConvTranspose2dOptions": [
                 "paddingCount",
                 "padding",
                 "stridesCount",
@@ -1575,21 +1575,46 @@
                 "outputSizesCount",
                 "outputSizes",
                 "autoPad",
-                "transpose",
                 "groups",
                 "inputLayout",
                 "filterLayout",
                 "bias",
                 "activation"
             ],
-            "MLGemmOptions": [
+            "WNNConv2dOptions": [
+                "paddingCount",
+                "padding",
+                "stridesCount",
+                "strides",
+                "dilationsCount",
+                "dilations",
+                "autoPad",
+                "groups",
+                "inputLayout",
+                "filterLayout",
+                "bias",
+                "activation"
+            ],
+            "WNNGemmOptions": [
                 "c",
                 "alpha",
                 "beta",
                 "aTranspose",
                 "bTranspose"
             ],
-            "MLGruOptions": [
+            "WNNGpuBufferView": [
+                "buffer",
+                "id",
+                "generation",
+                "size",
+                "offset"
+            ],
+            "WNNGpuDevice": [
+                "device",
+                "id",
+                "generation"
+            ],
+            "WNNGruOptions": [
                 "bias",
                 "recurrentBias",
                 "initialHiddenState",
@@ -1599,25 +1624,25 @@
                 "layout",
                 "activations"
             ],
-            "MLInstanceNormOptions": [
+            "WNNInstanceNormOptions": [
                 "scale",
                 "bias",
                 "epsilon",
                 "layout"
             ],
-            "MLLeakyReluOptions": [
+            "WNNLeakyReluOptions": [
                 "alpha"
             ],
-            "MLOperandDescriptor": [
+            "WNNOperandDescriptor": [
                 "type",
                 "dimensions",
                 "dimensionsCount"
             ],
-            "MLPadOptions": [
+            "WNNPadOptions": [
                 "mode",
                 "value"
             ],
-            "MLPool2dOptions": [
+            "WNNPool2dOptions": [
                 "windowDimensionsCount",
                 "windowDimensions",
                 "paddingCount",
@@ -1627,14 +1652,17 @@
                 "dilationsCount",
                 "dilations",
                 "autoPad",
-                "layout"
+                "layout",
+                "roundingType",
+                "outputSizesCount",
+                "outputSizes"
             ],
-            "MLReduceOptions": [
+            "WNNReduceOptions": [
                 "axesCount",
                 "axes",
                 "keepDimensions"
             ],
-            "MLResample2dOptions": [
+            "WNNResample2dOptions": [
                 "mode",
                 "scalesCount",
                 "scales",
@@ -1643,22 +1671,26 @@
                 "axesCount",
                 "axes"
             ],
-            "MLSliceOptions": [
+            "WNNSliceOptions": [
                 "axesCount",
                 "axes"
             ],
-            "MLSplitOptions": [
+            "WNNSplitOptions": [
                 "axis"
             ],
-            "MLSqueezeOptions": [
+            "WNNSqueezeOptions": [
                 "axesCount",
                 "axes"
             ],
-            "MLTransposeOptions": [
+            "WNNTransposeOptions": [
                 "permutationCount",
                 "permutation"
             ],
-            "MLInput": [
+            "WNNResource": [
+                "arrayBufferView",
+                "gpuBufferView"
+            ],
+            "WNNInput": [
                 "resource",
                 "dimensions",
                 "dimensionsCount"
