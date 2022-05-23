@@ -1350,6 +1350,12 @@ class libwebgpu_cpp(MTLibrary):
   src_dir = 'system/lib/webgpu'
   src_files = ['webgpu_cpp.cpp']
 
+class libwebnn_cpp(MTLibrary):
+  name = 'libwebnn_cpp'
+
+  cflags = ['-std=c++11']
+  src_dir = 'system/lib/webnn'
+  src_files = ['webnn_cpp.cpp']
 
 class libembind(Library):
   name = 'libembind'
@@ -1786,6 +1792,9 @@ def get_libs_to_link(args, forced, only_forced):
 
   if settings.USE_WEBGPU:
     add_library('libwebgpu_cpp')
+
+  if settings.USE_WEBNN:
+    add_library('libwebnn_cpp')
 
   return libs_to_link
 

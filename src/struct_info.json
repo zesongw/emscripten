@@ -1117,6 +1117,164 @@
             ]
         }
     },
+    {
+        "file": "webnn/webnn.h",
+        "defines": [],
+        "structs": {
+            "WNNArrayBufferView": [
+                "buffer",
+                "byteLength",
+                "byteOffset"
+            ],
+            "WNNBatchNormOptions": [
+                "scale",
+                "bias",
+                "axis",
+                "epsilon",
+                "activation"
+            ],
+            "WNNClampOptions": [
+                "minValue",
+                "maxValue"
+            ],
+            "WNNContextOptions": [
+                "devicePreference",
+                "powerPreference"
+            ],
+            "WNNConvTranspose2dOptions": [
+                "paddingCount",
+                "padding",
+                "stridesCount",
+                "strides",
+                "dilationsCount",
+                "dilations",
+                "outputPaddingCount",
+                "outputPadding",
+                "outputSizesCount",
+                "outputSizes",
+                "autoPad",
+                "groups",
+                "inputLayout",
+                "filterLayout",
+                "bias",
+                "activation"
+            ],
+            "WNNConv2dOptions": [
+                "paddingCount",
+                "padding",
+                "stridesCount",
+                "strides",
+                "dilationsCount",
+                "dilations",
+                "autoPad",
+                "groups",
+                "inputLayout",
+                "filterLayout",
+                "bias",
+                "activation"
+            ],
+            "WNNGemmOptions": [
+                "c",
+                "alpha",
+                "beta",
+                "aTranspose",
+                "bTranspose"
+            ],
+            "WNNGpuBufferView": [
+                "buffer",
+                "id",
+                "generation",
+                "size",
+                "offset"
+            ],
+            "WNNGpuDevice": [
+                "device",
+                "id",
+                "generation"
+            ],
+            "WNNGruOptions": [
+                "bias",
+                "recurrentBias",
+                "initialHiddenState",
+                "resetAfter",
+                "returnSequence",
+                "direction",
+                "layout",
+                "activations"
+            ],
+            "WNNInstanceNormOptions": [
+                "scale",
+                "bias",
+                "epsilon",
+                "layout"
+            ],
+            "WNNLeakyReluOptions": [
+                "alpha"
+            ],
+            "WNNOperandDescriptor": [
+                "type",
+                "dimensions",
+                "dimensionsCount"
+            ],
+            "WNNPadOptions": [
+                "mode",
+                "value"
+            ],
+            "WNNPool2dOptions": [
+                "windowDimensionsCount",
+                "windowDimensions",
+                "paddingCount",
+                "padding",
+                "stridesCount",
+                "strides",
+                "dilationsCount",
+                "dilations",
+                "autoPad",
+                "layout",
+                "roundingType",
+                "outputSizesCount",
+                "outputSizes"
+            ],
+            "WNNReduceOptions": [
+                "axesCount",
+                "axes",
+                "keepDimensions"
+            ],
+            "WNNResample2dOptions": [
+                "mode",
+                "scalesCount",
+                "scales",
+                "sizesCount",
+                "sizes",
+                "axesCount",
+                "axes"
+            ],
+            "WNNSliceOptions": [
+                "axesCount",
+                "axes"
+            ],
+            "WNNSplitOptions": [
+                "axis"
+            ],
+            "WNNSqueezeOptions": [
+                "axesCount",
+                "axes"
+            ],
+            "WNNTransposeOptions": [
+                "permutationCount",
+                "permutation"
+            ],
+            "WNNResource": [
+                "arrayBufferView",
+                "gpuBufferView"
+            ],
+            "WNNInput": [
+                "resource",
+                "dimensions",
+                "dimensionsCount"
+            ]
+        }
+    },
     // ===========================================
     // WebGPU
     //   NOTE: This section is auto-generated.

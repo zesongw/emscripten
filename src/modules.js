@@ -151,6 +151,11 @@ global.LibraryManager = {
       libraries.push('library_html5_webgpu.js');
     }
 
+    if (USE_WEBNN) {
+      libraries.push('library_webnn.js');
+      libraries.push('library_html5_webnn.js');
+    }
+
     if (BOOTSTRAPPING_STRUCT_INFO) {
       libraries = [
         'library_bootstrap.js',

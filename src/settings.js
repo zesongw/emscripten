@@ -567,6 +567,10 @@ var GL_PREINITIALIZED_CONTEXT = 0;
 // [link]
 var USE_WEBGPU = 0;
 
+// Enables support for WebNN (via "webnn/webnn.h").
+// [link]
+var USE_WEBNN = 0;
+
 // Enables building of stb-image, a tiny public-domain library for decoding
 // images, allowing decoding of images without using the browser's built-in
 // decoders. The benefit is that this can be done synchronously, however, it

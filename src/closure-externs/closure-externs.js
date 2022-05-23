@@ -200,6 +200,11 @@ var currentTime;
 var sampleRate;
 
 /*
+ * WebNN globals
+ */
+var MLGraphBuilder;
+
+/*
  * WebGPU globals
  */
 var GPUBufferUsage;
