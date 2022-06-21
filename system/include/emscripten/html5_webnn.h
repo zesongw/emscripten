@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-MLContext emscripten_webnn_create_context(MLContextOptions const* options = nullptr);
+WNNContext emscripten_webnn_create_context(wnn::ContextOptions const* options = nullptr);
 
 #ifdef __cplusplus
 } // ~extern "C"
