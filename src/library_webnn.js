@@ -552,7 +552,7 @@ var LibraryWebNN = {
     var builder = WebNN.mgrGraphBuilder.get(builderId);
     var namedOperands = WebNN.mgrNamedOperands.get(namedOperandsId);
     try {
-      var graph = builder["build"](namedOperands);
+      var graph = builder["buildSync"](namedOperands);
       return WebNN.mgrGraph.create(graph);
     } catch (error) {
       console.log('builder.build failed: ' + error);
@@ -893,13 +893,14 @@ var LibraryWebNN = {
     return WebNN.mgrGraphBuilder.create(builder);
   },
 
-  wnnGraphCompute: function(graphId, inputsId, outputsId) {
+  wnnContextComputeSync: function(contextId, graphId, inputsId, outputsId) {
+    var context = WebNN.mgrContext.get(contextId);
     var graph = WebNN.mgrGraph.get(graphId);
     var inputs = WebNN.mgrNamedInputs.get(inputsId);
     var outputs = WebNN.mgrNamedOutputs.get(outputsId);
-    graph["compute"](inputs, outputs);
+    context["computeSync"](graph, inputs, outputs)
   },
-
+  
 };
 
 autoAddDeps(LibraryWebNN, '$WebNN');

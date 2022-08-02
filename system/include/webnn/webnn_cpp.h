@@ -17,10 +17,12 @@ namespace wnn {
     enum class BackendType : uint32_t {
         Null = 0x00000000,
         DirectML = 0x00000001,
-        OpenVINO = 0x00000002,
-        OneDNN = 0x00000003,
-        MLAS = 0x00000004,
-        XNNPACK = 0x00000005,
+        DirectMLX = 0x00000002,
+        OpenVINO = 0x00000003,
+        OneDNN = 0x00000004,
+        MLAS = 0x00000005,
+        XNNPACK = 0x00000006,
+        NNAPI = 0x00000007,
     };
 
     enum class ConvTranspose2dFilterOperandLayout : uint32_t {
@@ -230,6 +232,8 @@ namespace wnn {
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
+        void Compute(Graph const& graph, NamedInputs const& inputs, NamedOutputs const& outputs, ComputeAsyncCallback callback, void * userdata) const;
+        void ComputeSync(Graph const& graph, NamedInputs const& inputs, NamedOutputs const& outputs) const;
         void InjectError(ErrorType type, char const * message) const;
         bool PopErrorScope(ErrorCallback callback, void * userdata) const;
         void PushErrorScope(ErrorFilter filter) const;
@@ -258,8 +262,6 @@ namespace wnn {
         using ObjectBase::ObjectBase;
         using ObjectBase::operator=;
 
-        void Compute(NamedInputs const& inputs, NamedOutputs const& outputs) const;
-        void ComputeAsync(NamedInputs const& inputs, NamedOutputs const& outputs, ComputeAsyncCallback callback, void * userdata) const;
 
       private:
         friend ObjectBase<Graph, WNNGraph>;

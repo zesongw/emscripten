@@ -59,10 +59,12 @@ typedef enum WNNAutoPad {
 typedef enum WNNBackendType {
     WNNBackendType_Null = 0x00000000,
     WNNBackendType_DirectML = 0x00000001,
-    WNNBackendType_OpenVINO = 0x00000002,
-    WNNBackendType_OneDNN = 0x00000003,
-    WNNBackendType_MLAS = 0x00000004,
-    WNNBackendType_XNNPACK = 0x00000005,
+    WNNBackendType_DirectMLX = 0x00000002,
+    WNNBackendType_OpenVINO = 0x00000003,
+    WNNBackendType_OneDNN = 0x00000004,
+    WNNBackendType_MLAS = 0x00000005,
+    WNNBackendType_XNNPACK = 0x00000006,
+    WNNBackendType_NNAPI = 0x00000007,
     WNNBackendType_Force32 = 0x7FFFFFFF
 } WNNBackendType;
 
@@ -358,6 +360,8 @@ typedef WNNNamedOutputs (*WebnnProcCreateNamedOutputs)();
 typedef WNNOperatorArray (*WebnnProcCreateOperatorArray)();
 
 // Procs of Context
+typedef void (*WebnnProcContextCompute)(WNNContext context, WNNGraph graph, WNNNamedInputs inputs, WNNNamedOutputs outputs, WNNComputeAsyncCallback callback, void * userdata);
+typedef void (*WebnnProcContextComputeSync)(WNNContext context, WNNGraph graph, WNNNamedInputs inputs, WNNNamedOutputs outputs);
 typedef void (*WebnnProcContextInjectError)(WNNContext context, WNNErrorType type, char const * message);
 typedef bool (*WebnnProcContextPopErrorScope)(WNNContext context, WNNErrorCallback callback, void * userdata);
 typedef void (*WebnnProcContextPushErrorScope)(WNNContext context, WNNErrorFilter filter);
@@ -370,8 +374,6 @@ typedef void (*WebnnProcFusionOperatorReference)(WNNFusionOperator fusionOperato
 typedef void (*WebnnProcFusionOperatorRelease)(WNNFusionOperator fusionOperator);
 
 // Procs of Graph
-typedef void (*WebnnProcGraphCompute)(WNNGraph graph, WNNNamedInputs inputs, WNNNamedOutputs outputs);
-typedef void (*WebnnProcGraphComputeAsync)(WNNGraph graph, WNNNamedInputs inputs, WNNNamedOutputs outputs, WNNComputeAsyncCallback callback, void * userdata);
 typedef void (*WebnnProcGraphReference)(WNNGraph graph);
 typedef void (*WebnnProcGraphRelease)(WNNGraph graph);
 
@@ -494,6 +496,8 @@ WEBNN_EXPORT WNNNamedOutputs webnnCreateNamedOutputs();
 WEBNN_EXPORT WNNOperatorArray webnnCreateOperatorArray();
 
 // Methods of Context
+WEBNN_EXPORT void wnnContextCompute(WNNContext context, WNNGraph graph, WNNNamedInputs inputs, WNNNamedOutputs outputs, WNNComputeAsyncCallback callback, void * userdata);
+WEBNN_EXPORT void wnnContextComputeSync(WNNContext context, WNNGraph graph, WNNNamedInputs inputs, WNNNamedOutputs outputs);
 WEBNN_EXPORT void wnnContextInjectError(WNNContext context, WNNErrorType type, char const * message);
 WEBNN_EXPORT bool wnnContextPopErrorScope(WNNContext context, WNNErrorCallback callback, void * userdata);
 WEBNN_EXPORT void wnnContextPushErrorScope(WNNContext context, WNNErrorFilter filter);
@@ -506,8 +510,6 @@ WEBNN_EXPORT void wnnFusionOperatorReference(WNNFusionOperator fusionOperator);
 WEBNN_EXPORT void wnnFusionOperatorRelease(WNNFusionOperator fusionOperator);
 
 // Methods of Graph
-WEBNN_EXPORT void wnnGraphCompute(WNNGraph graph, WNNNamedInputs inputs, WNNNamedOutputs outputs);
-WEBNN_EXPORT void wnnGraphComputeAsync(WNNGraph graph, WNNNamedInputs inputs, WNNNamedOutputs outputs, WNNComputeAsyncCallback callback, void * userdata);
 WEBNN_EXPORT void wnnGraphReference(WNNGraph graph);
 WEBNN_EXPORT void wnnGraphRelease(WNNGraph graph);
 

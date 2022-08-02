@@ -25,7 +25,7 @@ mergeInto(LibraryManager.library, {
             {{{ makeGetValue('optionsPtr', C_STRUCTS.WNNContextOptions.powerPreference, 'i32', false, true) }}}]
       };
     }
-    var context = navigator['ml'].createContext(options);
+    var context = navigator['ml'].createContextSync(options);
     return WebNN.mgrContext.create(context);
   },
 });

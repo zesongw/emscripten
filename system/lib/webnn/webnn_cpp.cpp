@@ -18,10 +18,12 @@ namespace wnn {
 
     static_assert(static_cast<uint32_t>(BackendType::Null) == WNNBackendType_Null, "value mismatch for BackendType::Null");
     static_assert(static_cast<uint32_t>(BackendType::DirectML) == WNNBackendType_DirectML, "value mismatch for BackendType::DirectML");
+    static_assert(static_cast<uint32_t>(BackendType::DirectMLX) == WNNBackendType_DirectMLX, "value mismatch for BackendType::DirectMLX");
     static_assert(static_cast<uint32_t>(BackendType::OpenVINO) == WNNBackendType_OpenVINO, "value mismatch for BackendType::OpenVINO");
     static_assert(static_cast<uint32_t>(BackendType::OneDNN) == WNNBackendType_OneDNN, "value mismatch for BackendType::OneDNN");
     static_assert(static_cast<uint32_t>(BackendType::MLAS) == WNNBackendType_MLAS, "value mismatch for BackendType::MLAS");
     static_assert(static_cast<uint32_t>(BackendType::XNNPACK) == WNNBackendType_XNNPACK, "value mismatch for BackendType::XNNPACK");
+    static_assert(static_cast<uint32_t>(BackendType::NNAPI) == WNNBackendType_NNAPI, "value mismatch for BackendType::NNAPI");
 
     // ConvTranspose2dFilterOperandLayout
 
@@ -507,6 +509,12 @@ namespace wnn {
     static_assert(sizeof(Context) == sizeof(WNNContext), "sizeof mismatch for Context");
     static_assert(alignof(Context) == alignof(WNNContext), "alignof mismatch for Context");
 
+    void Context::Compute(Graph const& graph, NamedInputs const& inputs, NamedOutputs const& outputs, ComputeAsyncCallback callback, void * userdata) const {
+        wnnContextCompute(GetHandle(), graph.GetHandle(), inputs.GetHandle(), outputs.GetHandle(), callback, reinterpret_cast<void * >(userdata));
+    }
+    void Context::ComputeSync(Graph const& graph, NamedInputs const& inputs, NamedOutputs const& outputs) const {
+        wnnContextComputeSync(GetHandle(), graph.GetHandle(), inputs.GetHandle(), outputs.GetHandle());
+    }
     void Context::InjectError(ErrorType type, char const * message) const {
         wnnContextInjectError(GetHandle(), static_cast<WNNErrorType>(type), reinterpret_cast<char const * >(message));
     }
@@ -552,12 +560,6 @@ namespace wnn {
     static_assert(sizeof(Graph) == sizeof(WNNGraph), "sizeof mismatch for Graph");
     static_assert(alignof(Graph) == alignof(WNNGraph), "alignof mismatch for Graph");
 
-    void Graph::Compute(NamedInputs const& inputs, NamedOutputs const& outputs) const {
-        wnnGraphCompute(GetHandle(), inputs.GetHandle(), outputs.GetHandle());
-    }
-    void Graph::ComputeAsync(NamedInputs const& inputs, NamedOutputs const& outputs, ComputeAsyncCallback callback, void * userdata) const {
-        wnnGraphComputeAsync(GetHandle(), inputs.GetHandle(), outputs.GetHandle(), callback, reinterpret_cast<void * >(userdata));
-    }
     void Graph::WebnnReference(WNNGraph handle) {
         if (handle != nullptr) {
             wnnGraphReference(handle);
